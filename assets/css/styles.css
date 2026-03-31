@@ -878,3 +878,149 @@ img {
   text-align: center;
   font-size: var(--small-font-size);
 }
+
+
+
+/*=============== SCROLLBAR TESTRESZABÁS ===============*/
+
+/* Görgetősáv háttér */
+::-webkit-scrollbar{
+  width: .6rem;
+  background-color: hsl(28, 12%, 15%);
+}
+
+/* Görgetősáv "fogantyú" */
+::-webkit-scrollbar-thumb{
+  background-color: hsl(28, 12%, 25%);
+}
+
+/* Hover állapot */
+::-webkit-scrollbar-thumb:hover{
+  background-color: hsl(28, 12%, 35%);
+}
+
+
+
+/*=============== STATISZTIKA BLOKK ===============*/
+
+/* Konténer (bal-jobb oszlop) */
+.stats-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Bal és jobb panel */
+.stats-left, .stats-right {
+    flex: 1;
+    background: #fff;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+/* TOP 3 kiemelések */
+.top-1 { background: #ffd70033; }
+.top-2 { background: #c0c0c033; }
+.top-3 { background: #cd7f3233; }
+
+/* Mobil nézet: egymás alá */
+@media(max-width:768px){
+    .stats-container {
+        flex-direction: column;
+    }
+}
+
+
+
+/*=============== SCROLL UP GOMB ===============*/
+
+/* Vissza a tetejére gomb */
+.scrollup{
+  position: fixed;
+  right: 1rem;
+  bottom: -50%;
+  background-color: var(--container-color);
+  color: var(--title-color);
+  box-shadow: 0 12px 24px hsla(0, 0%, 0%, .3);
+  display: inline-flex;
+  padding: 6px;
+  font-size: 1.25rem;
+  z-index: var(--z-tooltip);
+  transition: bottom .4s, transform .4s;
+}
+
+/* Hover animáció */
+.scrollup:hover{
+  transform: translateY(-.5rem);
+}
+
+/* Látható állapot */
+.show-scroll{
+  bottom: 3rem;
+}
+
+
+
+/*=============== BREAKPOINTOK ===============*/
+
+/* Kis eszközök */
+@media screen and (max-width: 340px) {
+  .container{
+    margin-inline: 1rem;
+  }
+
+  .home__title{
+    font-size: 2.5rem;
+  }
+  .home__footer{
+    flex-direction: column;
+    row-gap: 2rem;
+  }
+
+  .new__content{
+    grid-template-columns: 200px;
+    justify-content: center;
+  }
+
+  .new__card{
+    flex-direction: column;
+    row-gap: 1rem;
+    text-align: center;
+  }
+  .new__card:nth-child(2) img{
+    order: initial;
+  }
+
+  .favorite__container{
+    grid-template-columns: 180px;
+    justify-content: center;
+  }
+
+  .footer__content{
+    grid-template-columns: max-content;
+  }
+}
+
+/* Közepes eszközök */
+@media screen and (min-width: 576px){
+  .nav__menu{
+    width: 50%;
+  }
+
+  .home__container,
+  .new__content,
+  .about__container,
+  .visit__content{
+    grid-template-columns: 350%;
+    justify-content: center;
+  }
+
+  .favorite__container{
+    grid-template-columns: repeat(2, 180px);
+    justify-content: center;
+  }
+
+  .footer__content{
+    grid-template-columns: repeat(3, max-content);
+  }
+}
