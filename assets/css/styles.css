@@ -1245,3 +1245,216 @@ img {
     right: 3rem;
   }
 }
+
+
+
+/*========== GOOGLE MAP MEGJELENÍTÉS ==========*/
+/* Beágyazott térkép stílusozása */
+.map__container {
+   width: 100%;
+   border-radius: 1rem;
+   overflow: hidden;
+   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.map__container iframe {
+   width: 100%;
+   height: 450px;
+   border: 0;
+}
+
+/* Mobilon kisebb térkép */
+@media screen and (max-width: 768px) {
+   .map__container iframe {
+      height: 280px;
+   }
+}
+
+
+
+/*========== ABOUT SZEKCIÓ TÜKÖR ELRENDEZÉS ==========*/
+/* Alternatív layout (pl. váltott képes szekciókhoz) */
+.about--reverse .about__container {
+   direction: rtl;
+}
+
+.about--reverse .about__data,
+.about--reverse .about-img {
+   direction: ltr;
+}
+
+
+
+/*========== PROFIL LENYÍLÓ MENÜ ==========*/
+/* Felhasználói profil ikon és dropdown menü */
+.nav__profile-container {
+    position: relative;
+    display: inline-block;
+}
+
+.nav__profile-icon {
+    font-size: 1.5rem;
+    color: var(--title-color);
+    cursor: pointer;
+    transition: .3s;
+}
+
+.nav__profile-icon:hover {
+    color: var(--first-color);
+}
+
+/* Lenyíló ablak */
+.nav__dropdown {
+    display: none; /* Alapból rejtve */
+    position: absolute;
+    right: 0;
+    top: 2.5rem;
+    background-color: var(--container-color);
+    min-width: 180px;
+    padding: 1rem;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    border-radius: .5rem;
+    border: 1px solid var(--border-color);
+}
+
+.nav__dropdown-email {
+    display: block;
+    font-size: var(--small-font-size);
+    margin-bottom: .5rem;
+    color: var(--first-color);
+    font-weight: bold;
+}
+
+.nav__dropdown-link {
+    display: flex;
+    align-items: center;
+    column-gap: .5rem;
+    color: var(--text-color);
+    font-size: var(--normal-font-size);
+    padding: .5rem 0;
+    transition: .3s;
+}
+
+.nav__dropdown-link:hover {
+    color: var(--first-color);
+}
+
+/* Menü megjelenítése JS segítségével */
+.show-dropdown {
+    display: block;
+    animation: fadeIn .3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+/*========== TERMÉK KÉSZLET ÁLLAPOT ==========*/
+/* Színkódolt visszajelzés a készlet mennyiségéről */
+
+/* Elérhető */
+.favorite__card.stock-high .favorite__title,
+.favorite__card.stock-high .favorite__button {
+  color: var(--stock-green);
+}
+
+.favorite__card.stock-high:hover{
+  border-color: var(--stock-green);
+}
+
+
+/* Fogyóban */
+.favorite__card.stock-medium .favorite__title,
+.favorite__card.stock-medium .favorite__button {
+  color: var(--stock-yellow);
+}
+
+.favorite__card.stock-medium:hover{
+  border-color: var(--stock-yellow);
+}
+
+
+/* Elfogyott */
+.favorite__card.stock-zero .favorite__title,
+.favorite__card.stock-zero .favorite__button {
+  color: var(--stock-red);
+}
+
+.favorite__card.stock-zero:hover{
+  border-color: var(--stock-red);
+}
+
+.favorite__card.stock-zero .favorite__button{
+  pointer-events: none;
+  opacity: .5;
+}
+
+
+
+/*========== ADMIN STATISZTIKÁK ==========*/
+/* Admin felület kétoszlopos statisztika megjelenítése */
+.stats-container {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+  align-items: flex-start;
+}
+
+.stats-left,
+.stats-right {
+  flex: 1;
+  background-color: var(--container-color);
+  padding: 1.5rem;
+  border-radius: .75rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+
+/* Címek */
+.stats-left h3,
+.stats-right h3 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--first-color);
+}
+
+/* Táblázat design */
+.stats-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.stats-container th {
+  background-color: var(--black-color);
+  color: var(--first-color);
+}
+
+.stats-container td,
+.stats-container th {
+  padding: 10px;
+  text-align: center;
+}
+
+/* Hover */
+.stats-container tr:hover {
+  background-color: rgba(255,255,255,0.05);
+}
+
+
+
+/*========== TOP 3 KIEMELÉS ==========*/
+.top-1 {
+  background: linear-gradient(90deg, #ffd70033, transparent);
+  font-weight: bold;
+}
+
+.top-2 {
+  background: linear-gradient(90deg, #c0c0c033, transparent);
+}
+
+.top-3 {
+  background: linear-gradient(90deg, #cd7f3233, transparent);
+}
