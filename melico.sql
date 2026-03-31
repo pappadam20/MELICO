@@ -142,3 +142,9 @@ CREATE TABLE IF NOT EXISTS SETTINGS (
 INSERT INTO SETTINGS (coupon_percent, loyalty_threshold, max_discounted_items, max_usage_limit, coupon_validity_days)
 SELECT 10, 49999, 1, 1, 7 -- LOGIKAI KORLÁT: Csak akkor hajtódik végre a beszúrás, ha a tábla még üres.
 WHERE NOT EXISTS (SELECT 1 FROM SETTINGS); -- Ez megakadályozza, hogy minden futtatáskor újabb és újabb alapbeállítások jöjjenek létre.
+
+-- Teszt felhasználók (Admin, Futár, Vásárló)
+INSERT INTO USERS (id, name, profile_name, location, email, password, role) VALUES
+(1, 'Admin Péter', 'Admin', 'Budapest 1055 Kossuth Lajos tér 1.', 'admin@melico.hu', '$2y$10$A2N0tcUCU3.pfTIWr0sLuOIu/zL.wRYPb.fncs7RlT7FsiVkTgJr.', '2'),
+(2, 'Futár Károly', 'Futár', 'Debrecen 4024 Piac utca 10.', 'futar@melico.hu', '$2y$10$lvbfmLgUOTTWJYSHbO7dC.FDIahhT7u8.B1tcu3nP0KspDz.jFh2C', '1'),
+(3, 'Vásárló Zita', 'Zita', 'Szeged 6720 Dóm tér 12.', 'vasarlo@melico.hu', '$2y$10$/ZHQwARpNhgl2UDfL45LnuqvMhfhwFwBU9FwkraYiYfcEKRr3IhWq', '0');
