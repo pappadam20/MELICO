@@ -115,3 +115,52 @@ function updateUI() {
         if(userItem) userItem.style.display = 'none';
     }
 }
+
+// Dropdown megnyitása
+const profileIcon = document.getElementById('profileIcon');
+if (profileIcon) {
+    profileIcon.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('profileDropdown');
+        if(dropdown) dropdown.classList.toggle('show-dropdown');
+        e.stopPropagation();
+    });
+}
+
+// Kattintás kívülre -> Dropdown bezárása
+window.addEventListener('click', () => {
+    const dropdown = document.getElementById('profileDropdown');
+    if(dropdown) dropdown.classList.remove('show-dropdown');
+});
+
+// Kijelentkezés funkció hozzáadása
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.clear(); // Mindent töröl (isLoggedIn, userEmail, stb.)
+        window.location.href = 'index.html'; // Visszadob a főoldalra
+    });
+}
+
+document.addEventListener('DOMContentLoaded', updateUI);
+
+// Oldal betöltésekor fut le
+document.addEventListener('DOMContentLoaded', checkLoginStatus);
+
+
+
+sr.reveal(`.home__data, .about__img, .about__data, .visit__data`)
+
+sr.reveal(`.home__image, .footer__img-1, .footer__img-2`, {rotate: {z: -15} })
+sr.reveal(`.home__cheese, .about__cheese`, {rotate: {z: 15} })
+sr.reveal(`.home__footer`, {scale: 1, origin: 'bottom' })
+
+sr.reveal(`.new__card:nth-child(1) img`, {rotate: {z: -30}, distance: 0 })
+sr.reveal(`.new__card:nth-child(2) img`, {rotate: {z: 15}, distance: 0, delay: 600 })
+sr.reveal(`.new__card:nth-child(3) img`, {rotate: {z: -30}, distance: 0, delay: 900 })
+
+sr.reveal(`.favorite__card img`, {interval: 100, rotate: {z: 15}, distance: 0 })
+
+sr.reveal(`.testimonial__card`, {interval: 100})
+
+sr.reveal(`.footer__container`, { scale: 1 })
