@@ -305,3 +305,75 @@ body::before {
     margin-bottom: 2rem;
     font-size: var(--h2-font-size);
 }
+
+
+
+
+/*=============== RESPONSIVE MEGJELENÍTÉS ===============*/
+/*
+  Ez a szekció a kosár oldal reszponzív viselkedését szabályozza,
+  különböző képernyőméreteken (tablet és mobil).
+
+  Cél:
+  - jobb olvashatóság kisebb kijelzőn
+  - mobilbarát elrendezés
+*/
+
+/*=============== TABLET NÉZET (768px alatt) ===============*/
+/*
+  Tablet méretnél kisebb képernyők.
+
+  - Csökkentett padding → több hely marad a tartalomnak
+  - Nagyobb végösszeg → hangsúlyosabb megjelenés
+*/
+@media screen and (max-width: 768px) {
+    .cart__container {
+        padding: 1.5rem 1rem;
+    }
+    
+    .cart__total-amount {
+        font-size: var(--h1-font-size);
+    }
+}
+
+
+/*=============== MOBIL NÉZET (576px alatt) ===============*/
+/*
+  Kis képernyők (telefonok).
+
+  A klasszikus táblázat elrendezést "kártyás" formára alakítjuk:
+
+  - Fejléc eltűnik (thead)
+  - Minden sor külön blokk lesz
+  - Az adatok egymás alatt jelennek meg
+  - data-label segítségével megjelenik az oszlop neve
+*/
+@media screen and (max-width: 576px) {
+
+    /* Táblázat fejléc elrejtése */
+    .cart__table thead {
+        display: none;
+    }
+
+    /* Minden sor külön blokk */
+    .cart__table tr {
+        display: block;
+        padding: 1rem 0;
+        border-bottom: 1px solid hsl(0, 0%, 100%);
+    }
+
+    /* Cellák flex elrendezésben */
+    .cart__table td {
+        display: flex;
+        justify-content: space-between;
+        padding: .5rem 0;
+        border: none;
+    }
+
+    /* Bal oldalon megjelenik az oszlop neve */
+    .cart__table td::before {
+        content: attr(data-label);
+        color: var(--first-color);
+        font-weight: var(--font-semi-bold);
+    }
+}
