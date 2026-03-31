@@ -49,3 +49,19 @@ CREATE TABLE IF NOT EXISTS PRODUCTS (
     FOREIGN KEY (category_id) REFERENCES CATEGORIES(id), -- Idegen kulcs a kategóriához
     FOREIGN KEY (supplier_id) REFERENCES SUPPLIERS(id)   -- Idegen kulcs a szállítóhoz
 );
+
+
+-- TÁBLA: ORDERS; Leírás: Leadott rendelések és azok állapota, ETA adatokkal kiegészítve.
+CREATE TABLE IF NOT EXISTS ORDERS (
+    id INT PRIMARY KEY AUTO_INCREMENT,          -- Rendelés egyedi azonosító száma
+    user_id INT,                                -- A rendelést leadó vásárló azonosítója
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,   -- A rendelés leadásának pontos ideje
+    status ENUM('Megrendelve','Szállítás alatt','Kiszállítva','Lemondva') NOT NULL, -- Aktuális státusz
+    shipping_address VARCHAR(255),  -- Pontos szállítási cím a rendelés idején
+    -- Google Maps API alapú szállítási becslések:
+    eta_seconds INT DEFAULT NULL,         -- Várható út időtartama másodpercekben
+    eta_text VARCHAR(100) DEFAULT NULL,    -- Olvasható érkezési idő
+    eta_arrival DATETIME DEFAULT NULL,     -- Várható pontos érkezés dátuma
+    -- Kapcsolat a felhasználóval:
+    FOREIGN KEY (user_id) REFERENCES USERS(id)
+);
