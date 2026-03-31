@@ -137,3 +137,8 @@ CREATE TABLE IF NOT EXISTS SETTINGS (
     max_usage_limit INT DEFAULT 1,          -- Alapértelmezett felhasználási korlát (1 alkalom)
     coupon_validity_days INT DEFAULT 7      -- Hány napig érvényes egy generált kupon (7 nap)
 );
+
+-- Kezdeti érték beszúrása
+INSERT INTO SETTINGS (coupon_percent, loyalty_threshold, max_discounted_items, max_usage_limit, coupon_validity_days)
+SELECT 10, 49999, 1, 1, 7 -- LOGIKAI KORLÁT: Csak akkor hajtódik végre a beszúrás, ha a tábla még üres.
+WHERE NOT EXISTS (SELECT 1 FROM SETTINGS); -- Ez megakadályozza, hogy minden futtatáskor újabb és újabb alapbeállítások jöjjenek létre.
