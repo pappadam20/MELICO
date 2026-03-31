@@ -23,7 +23,7 @@ const navLink = document.querySelectorAll('.nav__link')
 
 const linkAction = () =>{
     const navMenu = document.getElementById('nav-menu')
-    // When we click on each nav__link, we remove the show-menu class
+    // Amikor rákattintunk az egyes nav__link elemekre, eltávolítjuk a show-menu osztályt
     navMenu.classList.remove('show-menu')
 }
 navLink.forEach(n => n.addEventListener('click', linkAction))
@@ -32,7 +32,7 @@ navLink.forEach(n => n.addEventListener('click', linkAction))
 /*=============== ADD BLUR HEADER ===============*/
 const blurHeader = () =>{
     const header = document.getElementById('header')
-    // Add a class if the bottom offset is greater than 50 viewport height, add the blur-header class to the header
+    // Ha az alsó eltolás meghaladja a nézőtér magasságának 50%-át, akkor a fejléchez adjuk hozzá a „blur-header” osztályt
     this.scrollY >= 50 ? header.classList.add('blur-header') 
                        : header.classList.remove('blur-header')
 }
@@ -42,7 +42,7 @@ window.addEventListener('scroll', blurHeader)
 /*=============== SHOW SCROLL UP ===============*/ 
 const scrollUp = () =>{
     const scrollUp = document.getElementById('scroll-up')
-    // When the scroll is higher than 350 viewport height, add the
+    // Ha a görgetés a nézőtér magasságának 350%-át meghaladja, akkor add hozzá a
     this.scrollY >= 350 ? scrollUp.classList.add('show-scroll') 
                        : scrollUp.classList.remove('show-scroll')
 }
@@ -81,7 +81,7 @@ const sr = ScrollReveal({
     scale: 1.1,
     duration: 2500,
     delay: 300,
-    //reset: true, // Animations repeat
+    //reset: true, // Az animációk ismétlődnek
 })
 
 
