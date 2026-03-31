@@ -126,3 +126,14 @@ CREATE TABLE IF NOT EXISTS USER_COUPONS (
     FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE,
     FOREIGN KEY (coupon_id) REFERENCES COUPONS(id) ON DELETE CASCADE
 );
+
+
+-- TÁBLA: SETTINGS; Leírás: Globális rendszerbeállítások (pl. hűségprogram küszöb).
+CREATE TABLE IF NOT EXISTS SETTINGS (
+    id INT PRIMARY KEY AUTO_INCREMENT,      -- Beállítás azonosítója
+    coupon_percent INT DEFAULT 10,          -- Automatikus kuponok alapértelmezett százaléka (10%)
+    loyalty_threshold INT DEFAULT 49999,    -- Vásárlási limit a hűségpontok/kuponok aktiválásához (49.999 Ft)
+    max_discounted_items INT DEFAULT 1,     -- Alapértelmezett termékszám limit a kedvezményekhez (1 db)
+    max_usage_limit INT DEFAULT 1,          -- Alapértelmezett felhasználási korlát (1 alkalom)
+    coupon_validity_days INT DEFAULT 7      -- Hány napig érvényes egy generált kupon (7 nap)
+);
