@@ -101,3 +101,15 @@ CREATE TABLE IF NOT EXISTS COUPONS (
     max_items INT DEFAULT 1,         -- Maximum hány termékre érvényesíthető a kosárban
     usage_limit INT DEFAULT 1        -- Összesen hányszor használható fel a rendszerben
 );
+
+
+-- TÁBLA: NOTIFICATIONS; Leírás: Rendszerüzenetek a felhasználóknak.
+CREATE TABLE IF NOT EXISTS NOTIFICATIONS (
+    id INT PRIMARY KEY AUTO_INCREMENT,  -- Értesítés egyedi azonosítója
+    user_id INT NOT NULL,               -- Címzett felhasználó
+    message TEXT NOT NULL,              -- Az üzenet szövege
+    is_read TINYINT DEFAULT 0,          -- Olvasottság állapota (0: olvasatlan, 1: olvasott)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Értesítés kiküldésének ideje
+    -- Kapcsolat: Ha törlik a felhasználót, az értesítései is törlődnek (CASCADE)
+    FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE
+);
