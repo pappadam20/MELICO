@@ -14,3 +14,11 @@ CREATE TABLE IF NOT EXISTS USERS (
     coupon_discount INT DEFAULT NULL,   -- Aktuális egyedi kupon mértéke (%)
     coupon_expiry INT DEFAULT NULL      -- Kupon lejárati ideje (időbélyeg vagy nap)
 );
+
+
+-- TÁBLA: CATEGORIES; Leírás: Termékcsoportosítás (pl. Lágy sajtok, Kemény sajtok).
+CREATE TABLE IF NOT EXISTS CATEGORIES (
+    id INT PRIMARY KEY AUTO_INCREMENT,  -- Kategória egyedi azonosítója
+    name VARCHAR(50),   -- Kategória neve
+    description TEXT    -- Kategória rövid leírása
+);
