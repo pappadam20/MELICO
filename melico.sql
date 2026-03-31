@@ -154,3 +154,15 @@ INSERT INTO CATEGORIES (id, name, description) VALUES
 (1, 'Lágy és Friss Sajtok', 'Rövid érlelésű, magas nedvességtartalmú sajtok.'),
 (2, 'Félkemény Sajtok', 'Közepes ideig érlelt, jól szeletelhető sajtok.'),
 (3, 'Kemény Sajtok', 'Hosszú érlelésű, alacsony nedvességtartalmú, reszelhető vagy törhető sajtok.');
+
+-- Beszállítók betöltése
+INSERT INTO SUPPLIERS (id, name, contact, email, phone, description) VALUES
+(1, 'Tiszántúli Sajtműhely', 'Kovács Elemér', 'kovacs.elemer@tisza.hu', '+36 30 123 4567', 'Klasszikus, hagyományos receptúrákra építő családi vállalkozás.'),
+(2, 'Bakonyi Kézműves Gazdaság', 'Nagy Anna', 'nagy.anna@bakony.hu', '+36 20 987 6543', 'Kecskesajtokra specializálódott gazdaság, természetes takarmányozással.'),
+(3, 'Pannon Sajtkerék', 'Tóth Balázs', 'toth.balazs@pannon.hu', '+36 70 555 1212', 'Erős, karakteres, kékpenészes és érlelt sajtok mestere.'),
+(4, 'Dél-Alföldi Érlelő', 'Kiss Katalin', 'kiss.katalin@dalfold.hu', '+36 30 222 3344', 'Hosszú érlelési idejű, kemény sajtokra koncentrál, olasz inspirációkkal.'),
+(5, 'Szekszárdi Borvidék Sajt', 'Varga Gábor', 'varga.gabor@szekszard.hu', '+36 20 111 2233', 'Különleges, borral és párlattal mosott kérgű sajtok.'),
+(6, 'Erdélyi Manufaktúra', 'Popescu Elena', 'elena.popescu@erdely.ro', '+40 74 123 0000', 'Hagyományos erdélyi receptek alapján készült, friss savósajtok.'),
+(7, 'Chili Suli', 'Fodor Bence', 'fodor.bence@chili.hu', '+36 30 777 8899', 'Fűszeres, különleges sajtok gyártója, prémium chili felhasználásával.'),
+(8, 'Zalai Tejtermék', 'Molnár Péter', 'molnar.peter@zalatej.hu', '+36 20 444 5566', 'Friss, puha sajtok specialistája (mozzarella, krémsajt).'),
+(9, 'Kisalföldi Gazdaság', 'Szabó Virág', 'szabo.virag@kfold.hu', '+36 70 999 0011', 'Holland típusú sajtokat gyártó modern üzem.');
