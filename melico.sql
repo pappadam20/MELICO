@@ -33,3 +33,19 @@ CREATE TABLE IF NOT EXISTS SUPPLIERS (
     phone VARCHAR(20),              -- Beszállító telefonszáma
     description TEXT    -- Bemutatkozó szöveg
 );
+
+
+-- TÁBLA: PRODUCTS; Leírás: Az elérhető termékek listája, árral és készletinfóval
+CREATE TABLE IF NOT EXISTS PRODUCTS (
+    id INT PRIMARY KEY AUTO_INCREMENT,  -- Termék egyedi azonosítója
+    category_id INT,    -- Kapcsolat a kategóriákhoz
+    supplier_id INT,    -- Kapcsolat a beszállítóhoz
+    name VARCHAR(100),  -- Termék neve (pl. Camembert)
+    description TEXT,   -- Termékleírás, összetevők
+    price INT,          -- Jelenlegi eladási ár (HUF)
+    image VARCHAR(255), -- A termékről készült kép fájlneve vagy URL-je
+    stock INT,  -- Aktuális raktárkészlet
+    -- Kapcsolatok definiálása (Idegen kulcsok):
+    FOREIGN KEY (category_id) REFERENCES CATEGORIES(id), -- Idegen kulcs a kategóriához
+    FOREIGN KEY (supplier_id) REFERENCES SUPPLIERS(id)   -- Idegen kulcs a szállítóhoz
+);
