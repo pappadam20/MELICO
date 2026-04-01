@@ -799,7 +799,10 @@ $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
       </div>
    </nav>
 </header>
+
+
 <h1>Admin Felület</h1>
+
 
 <!--==================== TAB MENÜ ====================-->
 <div class="tab">
@@ -809,6 +812,7 @@ $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
     <button class="tablinks" onclick="openTab(event,'edit')">Módosítás / Törlés</button>
     <button class="tablinks" onclick="openTab(event,'stats')">Statisztikák</button>
 </div>
+
 
 <!--==================== ÚJ TERMÉK HOZZÁADÁSA ====================-->
 <div id="add" class="tabcontent" style="display:block;">
@@ -847,6 +851,7 @@ $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
         <input type="submit" name="add" value="Hozzáadás" class="button">
     </form>
 </div>
+
 
 <!--==================== FELHASZNÁLÓ HOZZÁADÁSA ====================-->
 <div id="users" class="tabcontent" style="width:90%; max-width:1000px; margin:0 auto;">
@@ -927,3 +932,263 @@ $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
     </div>
 
 </div>
+
+
+<!--==================== ÚJ KATEGÓRIA/SZÁLLÍTÓ HOZZÁADÁSA ====================-->
+<div id="manage" class="tabcontent" style="width:80%; margin:0 auto; background:#f9f9f9; padding:20px; border-radius:8px;">
+    <div style="display: flex; gap: 40px; justify-content: space-around;">
+        
+        <div style="flex: 1;">
+            <h3 style="color:darkgoldenrod;">Új Kategória</h3>
+            <form method="POST">
+                <input type="text" name="cat_name" placeholder="Pl: Kemény sajtok" required>
+                <input type="submit" name="add_category" value="Kategória hozzáadása" class="button">
+            </form>
+            <h4 style="margin-top:20px; color:darkgoldenrod;">Meglévők:</h4>
+            <ul style="text-align:left; list-style:none; padding:0;">
+                <?php $categories->data_seek(0); while($c = $categories->fetch_assoc()): ?>
+                    <li style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding:5px 0;">
+                        <span><?php echo htmlspecialchars($c['name']); ?></span>
+                        <a href="admin.php?tab=manage&del_cat=<?php echo $c['id']; ?>"
+                            onclick="return confirm('Biztosan törlöd? Csak akkor fog sikerülni, ha nincs benne termék!')"
+                            style="color:red; text-decoration:none; font-weight:bold; font-size:18px; padding: 0 10px;">&times;</a>
+                    </li>
+                <?php endwhile; ?>
+            </ul>
+        </div>
+
+        <div style="flex: 1;">
+            <h3 style="color:darkgoldenrod;">Új Szállító</h3>
+            <form method="POST">
+                <input type="text" name="sup_name" placeholder="Pl: Pannon Sajtkerék" required>
+                <input type="submit" name="add_supplier" value="Szállító hozzáadása" class="button">
+            </form>
+            <h4 style="margin-top:20px; color:darkgoldenrod;">Meglévők:</h4>
+            <ul style="text-align:left; list-style:none; padding:0;">
+                <?php $suppliers->data_seek(0); while($s = $suppliers->fetch_assoc()): ?>
+                    <li style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding:5px 0;">
+                        <span><?php echo htmlspecialchars($s['name']); ?></span>
+                        <a href="admin.php?tab=manage&del_sup=<?php echo $s['id']; ?>"
+                            onclick="return confirm('Biztosan törlöd?')"
+                            style="color:red; text-decoration:none; font-weight:bold; font-size:18px; padding: 0 10px;">&times;</a>
+                    </li>
+                <?php endwhile; ?>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+
+<!--==================== MÓDOSÍTÁS / TÖRLÉS ====================-->
+<div id="edit" class="tabcontent">
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Név</th>
+            <th>Kép</th>
+            <th>Leírás</th>
+            <th>Ár</th>
+            <th>Készlet</th>
+            <th>Kategória</th>
+            <th>Szállító</th>
+            <th>Műveletek</th>
+        </tr>
+        <?php while($row = $products->fetch_assoc()): ?>
+        <tr>
+            <form method="POST" enctype="multipart/form-data">
+                <td><?php echo $row['id']; ?><input type="hidden" name="id" value="<?php echo $row['id']; ?>"></td>
+                <td><input type="text" name="name" value="<?php echo htmlspecialchars($row['name']); ?>"></td>
+                <td>
+                    <img src="assets/img/category_<?php echo $row['category_id']; ?>/<?php echo $row['image']; ?>" width="50"><br>
+                    <input type="file" name="image">
+                    <input type="hidden" name="current_image" value="<?php echo $row['image']; ?>">
+                </td>
+                <td><textarea name="description"><?php echo htmlspecialchars($row['description']); ?></textarea></td>
+                <td><input type="number" name="price" value="<?php echo $row['price']; ?>"></td>
+                <td><input type="number" name="stock" value="<?php echo $row['stock']; ?>"></td>
+                <td>
+                    <select name="category_id" required>
+                        <?php
+                        $categories->data_seek(0);
+                        while($cat = $categories->fetch_assoc()): ?>
+                            <option value="<?php echo $cat['id']; ?>" <?php if($cat['id']==$row['category_id']) echo 'selected'; ?>>
+                                <?php echo htmlspecialchars($cat['name']); ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </td>
+                <td>
+                    <select name="supplier_id" required>
+                        <?php
+                        $suppliers->data_seek(0);
+                        while($sup = $suppliers->fetch_assoc()): ?>
+                            <option value="<?php echo $sup['id']; ?>" <?php if($sup['id']==$row['supplier_id']) echo 'selected'; ?>>
+                                <?php echo htmlspecialchars($sup['name']); ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </td>
+                <td>
+                    <input type="submit" name="edit" value="Mentés" class="button-save">
+                    <a href="admin.php?tab=edit&delete=<?php echo $row['id']; ?>" onclick="return confirm('Biztosan törlöd?')" class="button button-delete">Törlés</a>
+                </td>
+            </form>
+        </tr>
+        <?php endwhile; ?>
+    </table>
+</div>
+
+
+<!--==================== STATS TAB ====================-->
+<div id="stats" class="tabcontent" style="display: <?php echo ($active_tab == 'stats') ? 'block' : 'none'; ?>; padding: 20px;">
+    <h2 style="color: darkgoldenrod; margin-bottom: 20px;">Adminisztrátori Statisztikák</h2>
+
+    <div style="width: 100%; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <h2 style="color: darkgoldenrod; margin-bottom: 15px;">Statisztikák (Termékek)</h2>
+        <form method="GET" style="margin-bottom:15px;">
+            <input type="hidden" name="tab" value="stats">
+            <label>Időszak:</label>
+            <select name="period" onchange="this.form.submit()" style="width: auto; padding: 5px; border-radius: 4px; border: 1px solid #ddd;">
+                <option value="day" <?php if($period=='day') echo 'selected'; ?>>Nap</option>
+                <option value="week" <?php if($period=='week') echo 'selected'; ?>>Hét</option>
+                <option value="month" <?php if($period=='month') echo 'selected'; ?>>Hónap</option>
+                <option value="half" <?php if($period=='half') echo 'selected'; ?>>Félév</option>
+                <option value="year" <?php if($period=='year') echo 'selected'; ?>>Év</option>
+            </select>
+        </form>
+
+        <table style="width:100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #ffbc3f; color: white;">
+                    <th style="padding: 10px; text-align: left;">Hely</th>
+                    <th style="text-align: left;">Termék</th>
+                    <th style="text-align: left;">Eladott</th>
+                    <th style="text-align: left;">Bevétel</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $rank = 1;
+                $stats_result->data_seek(0);
+                while($row = $stats_result->fetch_assoc()): ?>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px;"><?php echo $rank++; ?>.</td>
+                    <td><?php echo htmlspecialchars($row['name']); ?></td>
+                    <td><?php echo $row['total_quantity']; ?> kg</td>
+                    <td style="font-weight: bold;"><?php echo number_format($row['total_revenue'],0,'',' '); ?> Ft</td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="width: 100%; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <h2 style="color: darkgoldenrod; margin-bottom: 15px;">Vásárlói Statisztikák & Hűségprogram</h2>
+        
+        <div style="margin-bottom: 20px; background: #fdfdfd; padding: 10px; border-radius: 8px; border: 1px solid #eee; display: flex; gap: 10px; align-items: center;">
+            <i class="ri-search-line" style="font-size: 1.2rem; color: #ffbc3f;"></i>
+            <input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Vásárló keresése..." 
+                   style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; outline: none;">
+        </div>
+
+        <table id="userTable" style="width:100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #ffbc3f; color: white;">
+                    <th style="padding: 10px; text-align: left;">#</th>
+                    <th style="text-align: left;">Vásárló</th>
+                    <th style="text-align: left;">Vásárolt termékek (összesen)</th>
+                    <th style="text-align: left;">Összes költés</th>
+                    <th style="text-align: left;">Kupon (Összes)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $user_stats = $conn->query("
+                    SELECT 
+                        U.id, U.name, U.email,
+                        SUM(OI.quantity * OI.sale_price) as total_money,
+                        GROUP_CONCAT(CONCAT(P.name, ' (', OI.quantity, ' kg)') SEPARATOR '<br>') as detailed_products
+                    FROM USERS U
+                    JOIN ORDERS O ON U.id = O.user_id
+                    JOIN ORDER_ITEMS OI ON O.id = OI.order_id
+                    JOIN PRODUCTS P ON OI.product_id = P.id
+                    WHERE O.status = 'Kiszállítva'
+                    GROUP BY U.id
+                    ORDER BY total_money DESC
+                ");
+
+                $u_rank = 1;
+                while($u = $user_stats->fetch_assoc()):
+                    $total_money = $u['total_money'];
+                    $coupon_level = floor($total_money / $loyalty_threshold);
+                ?>
+                <tr class="user-row" style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px; font-weight: bold;"><?php echo $u_rank++; ?>.</td>
+                    <td>
+                        <span class="search-name" style="font-weight: 600; display: block;"><?php echo htmlspecialchars($u['name']); ?></span>
+                        <small style="color: #888;"><?php echo htmlspecialchars($u['email']); ?></small>
+                    </td>
+                    <td style="font-size: 0.8rem;">
+                        <div style="max-height: 100px; overflow-y: auto; background: #fffaf0; padding: 8px; border-radius: 4px; border: 1px solid #ffe8bc;">
+                            <?php echo $u['detailed_products']; ?>
+                        </div>
+                    </td>
+                    <td style="font-weight: 800; color: #d35400;">
+                        <?php echo number_format($total_money, 0, '', ' '); ?> Ft
+                    </td>
+                    <td>
+                        <?php 
+                        $st_count = $conn->prepare("SELECT COUNT(*) as cnt FROM USER_COUPONS WHERE user_id = ?");
+                        $st_count->bind_param("i", $u['id']);
+                        $st_count->execute();
+                        $existing = $st_count->get_result()->fetch_assoc()['cnt'];
+                        $st_count->close();
+
+                        if($existing > 0): ?>
+                            <div style="background: #e6ffed; border: 1px solid #b7eb8f; color: #52c41a; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; text-align:center;">
+                                <strong><?php echo $existing; ?> db</strong> kiadva
+                            </div>
+                        <?php else: ?>
+                            <span style="color: #ccc; font-size: 0.8rem;">Nincs</span>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="width: 100%; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 30px; font-family: sans-serif;">
+        <h2 style="color: darkgoldenrod; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+            <i class="ri-calendar-check-line"></i> Kupon érvényességi idő beállítása
+        </h2>
+
+        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <div style="background: #e0f2f1; padding: 12px 20px; border-radius: 5px; border-left: 5px solid #009688; min-width: 200px;">
+                <span style="display: block; font-size: 0.85rem; color: #004d40;">Jelenlegi érvényesség:</span>
+                <strong style="font-size: 1.5rem; color: #004d40;"><?php echo htmlspecialchars($coupon_validity_days); ?> nap</strong>
+            </div>
+
+            <form method="POST" action="admin.php?tab=stats" style="display: flex; gap: 10px; align-items: center; flex-grow: 1;">
+                <div style="position: relative; flex-grow: 0;">
+                    <input type="number" name="coupon_validity_days" min="1" max="365" required 
+                        value="<?= htmlspecialchars($coupon_validity_days) ?>"
+                        style="width: 120px; padding: 12px; border: 2px solid #eee; border-radius: 5px; outline: none; font-size: 1rem; transition: border-color 0.3s;"
+                        onfocus="this.style.borderColor='#009688'"
+                        onblur="this.style.borderColor='#eee'">
+                    <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #888; font-weight: bold;">nap</span>
+                </div>
+                
+                <button type="submit" name="save_coupon_duration" 
+                    style="cursor: pointer; background: #009688; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
+                    <i class="ri-time-line"></i> Időtartam mentése
+                </button>
+            </form>
+        </div>
+        
+        <p style="margin-top: 15px; font-size: 0.85rem; color: #666; display: flex; align-items: center; gap: 5px;">
+            <i class="ri-information-line" style="color: #009688; font-size: 1.1rem;"></i> 
+            Ez határozza meg, hogy a beváltás pillanatától számítva hány napig éljen a visszaszámláló a vásárlónál.
+        </p>
+    </div>
