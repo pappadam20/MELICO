@@ -1,0 +1,8 @@
+/*
+Live Server beállítás:
+Meghatározza, hogy a fejlesztői szerver melyik porton fusson.
+Ebben az esetben a weboldal a http://localhost:5502 címen lesz elérhető. 
+*/
+{
+    "liveServer.settings.port": 5502
+}
