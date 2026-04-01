@@ -114,3 +114,98 @@ body {
 .product__image.out-of-stock:hover img {
     box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.9); /* piros */
 }
+
+
+
+/*=============== KÉSZLET ÁLLAPOT SZÖVEG ===============*/
+.product__availability {
+    font-family: 'Courier New', Courier, monospace;
+    margin-top: 10px;
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-align: left;
+}
+
+/* Színkódolt állapotok */
+.available { color: #28a745; }
+.low-stock { color: #ffc107; }
+.out-of-stock { color: #dc3545; }
+
+
+
+/*=============== TERMÉK ADATOK ===============*/
+.product__data {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+/* Terméknév */
+.product__data h2 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+/* Kiegészítő adatok (pl. kategória) */
+.product__data span {
+    font-size: 1.1rem;
+    color: #a4a4a4;
+    margin-bottom: 15px;
+}
+
+/* Termékleírás */
+.product__data p {
+    font-size: 1rem;
+    color: #a4a4a4;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+/* Ár megjelenítése */
+.favorite__price {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #a4a4a4;
+}
+
+
+
+/*=============== KOSÁRBA GOMB ===============*/
+.favorite__button {
+    width: 180px;
+    padding: 12px 20px;
+    background-color: #ffae00;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: 0.3s;
+}
+
+/* Hover effekt a gombra */
+.favorite__button:hover {
+    background-color: #ffc400;
+}
+
+
+
+/*=============== RESPONSIVE (MOBIL NÉZET) ===============*/
+/* Kisebb képernyőn egymás alá kerülnek az elemek */
+@media screen and (max-width: 900px){
+    .product__container {
+        flex-direction: column;
+        align-items: center;
+    }
+    .product__image, .product__data {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
