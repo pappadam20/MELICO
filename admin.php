@@ -117,3 +117,83 @@ function checkAndGenerateUserCoupons($userId, $conn) {
         }
     }
 }
+
+
+
+/* =====================
+   RANDOM KUPON GENERÁLÓ
+=====================*/
+function generateRandomCoupon($length = 8) {
+    $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $code = '';
+    for($i = 0; $i < $length; $i++){
+        $code .= $chars[random_int(0, strlen($chars)-1)];
+    }
+    return $code;
+}
+
+
+
+/* =====================
+   TAB KEZELÉS (SESSION)
+=====================*/
+if(isset($_GET['tab'])){
+    $_SESSION['active_tab'] = $_GET['tab'];
+}
+
+// Alapértelmezett tab
+$active_tab = $_SESSION['active_tab'] ?? 'add'; // alapértelmezett tab
+
+
+
+/* =====================
+   JOGOSULTSÁG ELLENŐRZÉS
+=====================*/
+// Csak admin (role = 2) férhet hozzá az oldalhoz
+if(!isset($_SESSION['role']) || $_SESSION['role'] != '2'){  // role: 2 = admin, 1 = futár
+    header("Location: index.php");
+    exit;
+}
+
+
+
+/* =====================
+   KUPON SZÁZALÉK MENTÉSE
+=====================*/
+if(isset($_POST['save_coupon_percent'])){
+    $percent = intval($_POST['coupon_percent']);
+
+    // Ha még nincs sor, akkor insert
+    $check = $conn->query("SELECT id FROM SETTINGS LIMIT 1");
+
+    // Ha nincs rekord --> beszúrás
+    if($check->num_rows == 0){
+        $stmt = $conn->prepare("INSERT INTO SETTINGS (coupon_percent) VALUES (?)");
+        $stmt->bind_param("i", $percent);
+    } else {
+        // Ha van --> frissítés
+        $stmt = $conn->prepare("UPDATE SETTINGS SET coupon_percent=? LIMIT 1");
+        $stmt->bind_param("i", $percent);
+    }
+
+    $stmt->execute();
+    $stmt->close();
+
+    header("Location: admin.php?tab=stats");
+    exit;
+}
+
+
+
+/* =====================
+   SZÁLLÍTÓ HOZZÁADÁSA
+=====================*/
+if(isset($_POST['add_supplier'])){
+    $sup_name = $_POST['sup_name'];
+    $stmt = $conn->prepare("INSERT INTO SUPPLIERS (name) VALUES (?)");
+    $stmt->bind_param("s", $sup_name);
+    $stmt->execute();
+    $stmt->close();
+    header("Location: admin.php?tab=" . ($_SESSION['active_tab'] ?? 'add'));
+    exit;
+}
