@@ -809,3 +809,121 @@ $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
     <button class="tablinks" onclick="openTab(event,'edit')">Módosítás / Törlés</button>
     <button class="tablinks" onclick="openTab(event,'stats')">Statisztikák</button>
 </div>
+
+<!--==================== ÚJ TERMÉK HOZZÁADÁSA ====================-->
+<div id="add" class="tabcontent" style="display:block;">
+    <form method="POST" enctype="multipart/form-data">
+        <label>Név:</label>
+        <input type="text" name="name" required>
+
+        <label>Leírás:</label>
+        <textarea name="description"></textarea>
+
+        <label>Ár (Ft/kg):</label>
+        <input type="number" name="price" required>
+
+        <label>Készlet:</label>
+        <input type="number" name="stock" required>
+
+        <label>Kategória:</label>
+        <select name="category_id" required>
+            <?php while($cat = $categories->fetch_assoc()): ?>
+            <option value="<?php echo $cat['id']; ?>"><?php echo htmlspecialchars($cat['name']); ?></option>
+            <?php endwhile; ?>
+        </select>
+
+        <label>Szállító:</label>
+        <select name="supplier_id" required>
+            <?php
+            $suppliers->data_seek(0);
+            while($sup = $suppliers->fetch_assoc()): ?>
+            <option value="<?php echo $sup['id']; ?>"><?php echo htmlspecialchars($sup['name']); ?></option>
+            <?php endwhile; ?>
+        </select>
+
+        <label>Kép:</label>
+        <input type="file" name="image" accept="image/*">
+
+        <input type="submit" name="add" value="Hozzáadás" class="button">
+    </form>
+</div>
+
+<!--==================== FELHASZNÁLÓ HOZZÁADÁSA ====================-->
+<div id="users" class="tabcontent" style="width:90%; max-width:1000px; margin:0 auto;">
+    
+    <div style="display:flex; gap:40px; flex-wrap:wrap;">
+
+        <!-- BAL OLDAL -->
+        <div style="flex:1;">
+            <h2>Új admin vagy futár hozzáadása</h2>
+
+            <form method="POST">
+                <label>Felhasználónév:</label>
+                <input type="text" name="username" required>
+
+                <label>Email:</label>
+                <input type="email" name="email" required>
+
+                <label>Jelszó:</label>
+                <input type="password" name="password" required>
+
+                <label>Szerepkör:</label>
+                <select name="role" required>
+                    <option value="2">Admin</option>
+                    <option value="1">Futár</option>
+                </select>
+
+                <input type="submit" name="add_user" value="Hozzáadás" class="button">
+            </form>
+        </div>
+
+        <!-- JOBB OLDAL -->
+        <div style="flex:1;">
+            <h2>Felhasználók listája</h2>
+
+            <form method="GET" style="margin-bottom:10px;">
+                <input type="hidden" name="tab" value="users">
+                <label>Szűrés szerepkör szerint:</label>
+                <select name="filter_role" onchange="this.form.submit()">
+                    <option value="all" <?php if($filter_role=='all') echo 'selected'; ?>>Összes</option>
+                    <option value="2" <?php if($filter_role=='2') echo 'selected'; ?>>Admin</option>
+                    <option value="1" <?php if($filter_role=='1') echo 'selected'; ?>>Futár</option>
+                    <option value="0" <?php if($filter_role=='0') echo 'selected'; ?>>Vásárló</option>
+                </select>
+            </form>
+
+
+            <table>
+                <tr>
+                    <th>Név</th>
+                    <th>Email</th>
+                    <th>Szerepkör</th>
+                    <th>Művelet</th>
+                </tr>
+
+                <?php while($u = $users->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($u['name']); ?></td>
+                    <td><?php echo htmlspecialchars($u['email']); ?></td>
+                    <td>
+                        <?php
+                        if($u['role'] == '2') echo "<span style='color:red;'>Admin</span>";
+                        elseif($u['role'] == '1') echo "<span style='color:blue;'>Futár</span>";
+                        else echo "<span style='color:green;'>Vásárló</span>";
+                        ?>
+                    </td>
+                    <td>
+                        <?php if($u['role']=='1' || $u['role']=='2'): ?>
+                            <a href="admin.php?tab=users&del_user=<?php echo $u['id']; ?>"
+                            onclick="return confirm('Biztosan törlöd a felhasználót?')"
+                            style="color:red; text-decoration:none; font-weight:bold;">Törlés</a>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+            </table>
+        </div>
+
+    </div>
+
+</div>
