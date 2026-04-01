@@ -1,1 +1,57 @@
+/*=============== TERMÉK OLDAL ALAP BEÁLLÍTÁSOK ===============*/
+/* Az alap HTML és BODY stílusok nullázása, valamint a teljes képernyős háttér beállítása */
+body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: sans-serif;
+        }
 
+/* Háttérkép beállítása a termék oldalhoz */
+body {
+    background-image: url('../../assets/img/Termékek-bg.png'); 
+    background-size: cover;         /* teljes képernyőt kitölti */
+    background-position: center;    /* középre igazítás */
+    background-attachment: fixed;   /* görgetésnél fix háttér */
+    background-repeat: no-repeat;
+}
+
+
+/*=============== VISSZA GOMB (FŐOLDALRA) ===============*/
+/* Fix pozícióban elhelyezett navigációs gomb */
+.back-home {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1rem;
+
+    text-decoration: none;
+    align-items: center;
+    gap: 5px;
+
+    z-index: 1000;
+
+    width: 90px;
+    padding: 8px 20px;
+    background-color: #5e3a00;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+/* Hover effekt a vissza gombra */
+.back-home:hover {
+    background-color: #9b6000;
+    text-decoration: underline;
+}
+
+.back-button:hover {
+    background-color: rgba(0,0,0,0.9);
+}
