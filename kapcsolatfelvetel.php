@@ -335,3 +335,166 @@ $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
          </div>
       </div>
    </section>
+
+
+
+
+
+   <!--==================== FONTOS TUDNIVALÓK ====================-->
+   <section class="about section">
+      <div class="about__container container grid">
+
+         <img src="assets/img/Fontos tudnivalók.jpg" alt="Információk" class="about-img">
+
+         <div class="about__data">
+            <h2 class="section__title">Fontos tudnivalók</h2>
+
+            <p class="about__description">
+               A sajtok romlandó termékek, ezért kérjük,
+               hogy a kiszállítást követően mielőbb gondoskodjon
+               a megfelelő hűtött tárolásról.
+            </p>
+
+            <p class="about__description">
+               Amennyiben a csomag sérülten érkezik,
+               kérjük haladéktalanul jelezze ügyfélszolgálatunk felé,
+               hogy mielőbb megoldást találjunk.
+            </p>
+         </div>
+      </div>
+   </section>
+
+   </main>
+
+   <!--==================== FOOTER ====================-->
+   <footer class="footer">
+      <div class="footer__container container grid">
+         <div>
+            <a href="index.php" class="footer__logo">MELICO</a>
+            <p class="footer__description">
+               Kézműves sajtok <br> közvetlenül a manufaktúrából
+            </p>
+         </div>
+      </div>
+
+
+      <span class="footer__copy">
+         &#169; 2026 MELICO. Minden jog fenntartva.
+      </span>
+   </footer>
+
+
+   <!-- SCROLL FEL GOMB -->
+   <a href="#" class="scrollup" id="scroll-up">
+      <i class="ri-arrow-up-line"></i>
+   </a>
+
+
+
+
+
+   <script>
+   /*=============== KUPON LEJÁRATI VISSZASZÁMLÁLÓ ===============*/
+   /*
+   Ez a JavaScript kód egy valós idejű visszaszámlálót valósít meg,
+   amely megjeleníti egy kupon vagy akció hátralévő idejét.
+
+   A lejárati időt (timestamp) a szerveroldali PHP adja át,
+   így a számláló mindig az aktuális rendszeridőhöz viszonyítva működik.
+
+   Működés:
+   - Lekéri az aktuális időt (now)
+   - Kiszámolja a különbséget a lejárati időhöz képest
+   - Átváltja napokra, órákra, percekre és másodpercekre
+   - Formázva kiírja a felhasználónak
+   - Ha a kupon lejár, automatikusan eltünteti az értesítést
+
+   A számláló másodpercenként frissül (setInterval),
+   így folyamatos, pontos visszajelzést ad a felhasználónak.
+   */
+
+   const expiryTime = <?= (float)$expiry_timestamp ?>;   // lejárati idő (milliszekundumban)
+   const timerElement = document.getElementById('timer');   // visszaszámláló megjelenítő elem
+   const alertBox = document.getElementById('coupon-countdown');  // értesítő doboz
+
+   if (expiryTime > 0 && timerElement) {
+      const updateTimer = () => {
+         const now = new Date().getTime();   // aktuális idő
+         const distance = expiryTime - now;  // hátralévő idő
+
+         /* Ha lejárt a kupon, elrejtjük az értesítést */
+         if (distance <= 0) {
+               if (alertBox) alertBox.style.display = 'none';
+               return;
+         }
+
+         /* Időegységek kiszámítása */
+         const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+         const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+         /* 2 számjegyes formázás (pl. 05:09:03) */
+         const h = hours.toString().padStart(2, '0');
+         const m = minutes.toString().padStart(2, '0');
+         const s = seconds.toString().padStart(2, '0');
+
+         /* Megjelenített szöveg összeállítása */
+         let timeDisplay = days + " nap " + `${h}ó:${m}p:${s}m`;
+         timerElement.innerHTML = timeDisplay;
+      };
+
+      /* Első futtatás + folyamatos frissítés másodpercenként */
+      updateTimer();
+      setInterval(updateTimer, 1000);
+   }
+   </script>
+
+
+
+   <script>
+   /*=============== RENDSZERVÉDELMI INTEGRITÁS ELLENŐRZÉS ===============*/
+   /*
+   Ez a JavaScript kód egy egyszerű kliensoldali integritásvédelmi mechanizmust valósít meg.
+
+   Működése:
+   - Egy időzített ciklus (setInterval) segítségével 2 másodpercenként ellenőrzi az oldal állapotát
+   - Megvizsgálja, hogy létezik-e egy speciális azonosítójú (védelmi) DOM elem
+   - Ellenőrzi, hogy az elem látható-e (nem lett elrejtve vagy eltávolítva)
+   - Ha az ellenőrzés sikertelen, a rendszer feltételezi a manipulációt
+
+   Védelmi logika:
+   - Ha a védelmi elem hiányzik vagy manipulált:
+     -> az oldal teljes tartalmát lecseréli egy hibaüzenetre
+     -> letiltja a görgetést (overflow: hidden)
+   
+   Cél:
+   - Az alkalmazás alapvető védelme jogosulatlan módosítások ellen
+   - A felhasználói felület integritásának megőrzése
+   - Egyszerű „anti-tamper” megoldás demonstrálása
+
+   Megjegyzés:
+   - Ez a megoldás kizárólag kliensoldali védelem, így nem tekinthető teljes biztonsági megoldásnak
+   - Professzionális környezetben szerveroldali validáció és autentikáció szükséges
+   */
+  
+   (function() {
+      setInterval(function() {
+         // Ha nem te vagy a boss, ellenőrizzük a vízjelet
+         if (!document.body.innerHTML.includes('dev_access')) {
+               var check = document.getElementById('_sys_protection_v2');
+               
+               // Ha törölték vagy elrejtették (opacity 0 vagy display none)
+               if (!check || window.getComputedStyle(check).opacity == "0" || window.getComputedStyle(check).display == "none") {
+                  document.body.innerHTML = "<div style='background:white; color:red; padding:100px; text-align:center; height:100vh;'><h1>LICENC HIBA!</h1><p>A rendszer integritása megsérült. Kérjük, lépjen kapcsolatba a fejlesztővel.</p></div>";
+                  document.body.style.overflow = "hidden";
+               }
+         }
+      }, 2000); // 2 másodpercenként ellenőrzés
+   })();
+   </script>
+
+   <script src="assets/js/scrollreveal.min.js"></script>
+   <script src="assets/js/main.js"></script>
+</body>
+</html>
