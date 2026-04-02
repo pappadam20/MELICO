@@ -332,3 +332,95 @@ if (isset($_POST['save_cart'])) {
     </style>
 </head>
 <body>
+
+    <main class="main">
+        <!-- Vissza gomb: az előző oldalra navigál a $back_url változó alapján -->
+        <a href="<?= htmlspecialchars($back_url); ?>" class="button button--back" style="margin-bottom: 1rem; margin-left: 1rem; display: inline-flex;">
+            <i class="ri-arrow-left-line"></i> Vissza
+        </a>
+
+        <!-- Kosár szekció: a felhasználó kosarának megjelenítése -->
+        <section class="cart__section container">
+            <h2 class="section__title">Kosár tartalma</h2>
+
+            <!-- Ellenőrzés: ha a kosár nem üres -->
+            <?php if (!empty($_SESSION['cart'])): ?>
+                <div class="cart__container">
+                    <!-- Kosár tartalmát megjelenítő táblázat -->
+                    <table class="cart__table">
+                        <thead>
+                            <tr>
+                                <th>Termék</th>
+                                <th>Ár</th>
+                                <th>Mennyiség</th>
+                                <th>Művelet</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Kosár elemeinek bejárása ciklussal -->
+                            <?php foreach ($_SESSION['cart'] as $index => $item): ?>
+                                <tr>
+                                    <!-- Termék neve biztonságos kiírással -->
+                                    <td class="cart__item-name"><?= htmlspecialchars($item['name']); ?></td>
+
+                                    <!-- Ár formázása (ezres tagolás, Ft végződés) -->
+                                    <td class="cart__item-price"><?= number_format($item['price'], 0, ',', ' '); ?> Ft</td>
+
+                                    <!-- Mennyiség megjelenítése -->
+                                    <td><?= $item['quantity'] ?> db</td>
+
+                                    <!-- Törlés gomb: adott termék eltávolítása index alapján -->
+                                    <td>
+                                        <a href="?remove=<?= $index; ?>" class="cart__delete">
+                                            <i class="ri-delete-bin-line"></i> Törlés
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+
+                    <!-- Kosár alsó rész: összegzés és műveletek -->
+                    <div class="cart__footer">
+                        <!-- Összegzés blokk -->
+                        <div class="cart__total-details">
+                            <!-- Ha van kedvezmény, részösszeg és kedvezmény megjelenítése -->
+                            <?php if ($discount_amount > 0): ?>
+                                <p>Részösszeg: <?= number_format($subtotal, 0, ',', ' '); ?> Ft</p>
+                                <p class="discount-info">Kedvezmény: -<?= number_format($discount_amount, 0, ',', ' '); ?> Ft</p>
+                            <?php endif; ?>
+                            <!-- Végösszeg megjelenítése -->
+                            <p class="cart__total">Végösszeg: <?= number_format($total, 0, ',', ' '); ?> Ft</p>
+                        </div>
+                        
+                        <!-- Gombok csoportja: rendelés leadása és kosár ürítése -->
+                        <div class="button-group">
+                            <!-- Rendelés mentése / leadása -->
+                            <form method="POST" style="display:inline-block;">
+                                <button type="submit" name="save_cart" class="button button--save">
+                                    <i class="ri-save-3-fill"></i> Rendelés leadása
+                                </button>
+                            </form>
+
+                            <!-- Kosár teljes kiürítése -->
+                            <form method="POST" style="display:inline-block;">
+                                <button type="submit" name="clear_cart" class="button button--delete">
+                                    <i class="ri-delete-bin-2-fill"></i> Összes törlése
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Ha a kosár üres -->
+            <?php else: ?>
+                <div class="cart__container cart__empty" style="text-align: center; padding: 3rem;">
+                    <!-- Ikon vizuális jelzésként -->
+                    <i class="ri-shopping-cart-line" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                    
+                    <!-- Üres kosár üzenet -->
+                    <p>A kosár jelenleg üres.</p>
+                </div>
+            <?php endif; ?>
+        </section>
+    </main>
