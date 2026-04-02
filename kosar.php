@@ -264,3 +264,71 @@ if (isset($_POST['save_cart'])) {
     }
 }
 ?>
+<!-- 
+    =============== KOSÁR OLDAL (HTML STRUKTÚRA) ===============
+    Ez a dokumentum a MELICO webáruház kosár oldalának alap HTML felépítését tartalmazza.
+    A <head> részben történik a metaadatok, külső stíluslapok és ikonok betöltése.
+    
+    - A charset UTF-8 biztosítja a magyar ékezetes karakterek helyes megjelenítését.
+    - A viewport beállítás a reszponzív (mobilbarát) megjelenítést segíti.
+    - A Remixicon ikonkönyvtár külső CDN-ről kerül betöltésre.
+    - A style.css az alap stílusokat, míg a kosar.css a kosár oldal specifikus kinézetét tartalmazza.
+    - A time(); cache frissítést biztosít (mindig a legfrissebb CSS töltődik be).
+    
+    Az inline <style> blokk kisebb, oldal-specifikus stílusokat tartalmaz:
+    - Kosár lábléc elrendezése (flexbox)
+    - Összeg és kedvezmény kiemelése
+    - Gombok csoportos elhelyezése
+    
+    A <body> részben kezdődik az oldal tényleges tartalma.
+-->
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kosár – MELICO</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.7.0/remixicon.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/css/kosar.css?v=<?= time(); ?>">
+    <style>
+
+        /* Kosár láblécének elrendezése */
+        .cart__footer {
+            display: flex;              /* flexbox elrendezés */
+            flex-direction: column;     /* elemek egymás alatt */
+            align-items: flex-end;      /* jobbra igazítás */
+            gap: 0.5rem;                /* kis térköz az elemek között */
+            margin-top: 2rem;           /* felső margó */
+        }
+
+        /* Összeg rész (árak, kedvezmény) */
+        .cart__total-details {
+            text-align: right;      /* szöveg jobbra igazítva */
+            margin-bottom: 1rem;    /* alsó margó */
+        }
+
+        /* Végösszeg kiemelése */
+        .cart__total {
+            font-weight: bold;      /* vastag betű */
+            font-size: 1.4rem;      /* nagyobb betűméret */
+            color: #000000;       /* fekete szín */
+        }
+
+        /* Kedvezmény információ megjelenítése */
+        .discount-info {
+            color: #ffbc3f;     /* kiemelő (sárgás) szín */
+            font-weight: bold;    /* vastag betű */
+            font-size: 1rem;      /* normál méret */
+        }
+
+        /* Gombok csoportosítása (pl. fizetés, törlés) */
+        .button-group {
+            display: flex;          /* egymás mellé rendezés */
+            align-items: center;    /* függőleges középre igazítás */
+            gap: 1rem;              /* térköz a gombok között */
+        }
+    </style>
+</head>
+<body>
