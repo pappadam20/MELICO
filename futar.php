@@ -170,3 +170,191 @@ $sql = "SELECT O.id, O.date, O.status, U.name, U.email, U.location, U.id as uid,
         ORDER BY O.date DESC";
 $orders_res = $conn->query($sql);
 ?>
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+   <!-- Favicon (weboldal ikon) -->
+   <link rel="shortcut icon" href="assets/img/logo/MELICO LOGO 2.png" type="image/x-icon">
+
+   <!-- Ikonkészlet (Remix Icon) -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.7.0/remixicon.css">
+
+   <!-- Fő stíluslap -->
+   <link rel="stylesheet" href="assets/css/styles.css">
+
+   <title>Futár Panel - MELICO</title>
+
+   <style>
+
+        /*=============== OLDAL HÁTTÉR ===============*/
+       /*
+         Fix háttérkép a futár panelhez.
+         - teljes képernyős megjelenés
+         - nem ismétlődik
+         - középre igazított
+         - scroll közben fix marad
+       */
+       body {
+           background-image: url('assets/img/futar-bg.png');
+           background-size: cover;
+           background-position: center;
+           background-attachment: fixed;
+           background-repeat: no-repeat;
+           margin: 0;
+       }
+
+       /*=============== FŐ SZEKCIÓ ===============*/
+       /*
+         A futár panel teljes tartalmát középre igazítja.
+       */
+       .futar__section {
+           padding-top: 8rem;
+           padding-bottom: 4rem;
+           min-height: 80vh;
+           display: flex;
+           justify-content: center;
+       }
+
+       /*=============== KONTAINER ===============*/
+       /*
+         Fehér kártya, ami tartalmazza az összes rendelést.
+       */
+       .futar__container {
+           background-color: #ffffff;
+           padding: 2rem;
+           border-radius: 12px;
+           box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+           max-width: 800px;
+           width: 95%;
+       }
+
+       /*=============== CÍM ===============*/
+       /*
+         Futár panel címe ikon + szöveg középre igazítva.
+       */
+       .futar__title {
+           color: #175e69;
+           text-align: center;
+           margin-bottom: 2rem;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           gap: 10px;
+       }
+
+       /*=============== RENDELÉS KÁRTYA ===============*/
+       /*
+         Egy-egy rendelés megjelenése listában.
+       */
+       .order__card {
+           background-color: #f9f9f9;
+           border: 1px solid #eee;
+           padding: 1.25rem;
+           border-radius: 8px;
+           margin-bottom: 1rem;
+           cursor: pointer;
+           transition: 0.3s;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+       }
+
+       /* Hover effekt -> kiemelés */
+       .order__card:hover {
+           border-color: #28afc4;
+           transform: translateX(5px);
+       }
+
+       /*=============== STÁTUSZ CÍMKE ===============*/
+       /*
+         Rendelés állapotát jelző badge.
+       */
+       .status-badge {
+           padding: 4px 12px;
+           border-radius: 20px;
+           font-size: 0.75rem;
+           font-weight: bold;
+           background-color: #eee;
+       }
+
+       /* Aktív állapot */
+       .status--active {
+           background-color: #28afc4;
+           color: white;
+       }
+
+       /*=============== RÉSZLET NÉZET ===============*/
+       /*
+         Rendelés részletes megtekintése.
+         Alapból rejtve van.
+       */
+       .detail__view {
+           display: none;
+           animation: fadeIn 0.3s ease;
+       }
+
+       /*=============== ANIMÁCIÓ ===============*/
+       /*
+         Részletek megjelenésekor finom fade-in animáció.
+       */
+       @keyframes fadeIn {
+           from { opacity: 0; transform: translateY(10px); }
+           to { opacity: 1; transform: translateY(0); }
+       }
+
+       /*=============== INFORMÁCIÓS DOBOZ ===============*/
+       /*
+         Rendelés adatok kiemelt blokkban.
+       */
+       .detail__info-box {
+           background-color: #f9f9f9;
+           padding: 1.5rem;
+           border-radius: 8px;
+           border: 1px solid #249db0;
+           margin-bottom: 1.5rem;
+       }
+
+       /*=============== GOMBOK ===============*/
+       /*
+         Alap gomb (pl. rendelés kezelése)
+       */
+       .button {
+           background-color: #43b2d3;
+           color: white;
+           border: none;
+           padding: 12px 20px;
+           border-radius: 4px;
+           cursor: pointer;
+           font-weight: bold;
+           width: 100%;
+           display: inline-flex;
+           align-items: center;
+           justify-content: center;
+           gap: 8px;
+           transition: background-color 0.3s;
+       }
+
+       /* Hover állapot */
+       .button:hover {
+           background-color: #007193;
+       }
+
+       /* Vissza gomb */
+       .button--back {
+           background: none;
+           color: #43b2d3;
+           width: auto;
+           padding: 0;
+           margin-bottom: 1rem;
+       }
+
+       .button--back:hover {
+           color: #ffffff;
+           text-decoration: underline;
+       }
+   </style>
+</head>
+<body>
