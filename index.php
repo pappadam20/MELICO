@@ -245,3 +245,78 @@ if (isset($_POST['add_to_cart'])) {
     exit();
 }
 ?>
+<!--=============== HTML ALAPSTRUKTÚRA (HEAD RÉSZ) ===============-->
+<!--
+    Ez a dokumentum a MELICO weboldal alap HTML szerkezetét tartalmazza.
+    A <head> szekcióban kerülnek meghatározásra a meta adatok (karakterkódolás, reszponzivitás),
+    a külső erőforrások (ikonok, betűtípusok, stíluslapok), valamint az oldal címe.
+
+    Tartalmaz továbbá egy egyedi stílusblokkot is, amely a kupon értesítési sáv (coupon-alert)
+    és a hozzá tartozó visszaszámláló megjelenítéséért felel.
+
+    A kupon sáv alapértelmezetten rejtett (display: none), és JavaScript segítségével jelenik meg,
+    amikor a felhasználónak aktív kedvezménye van.
+-->
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+   <!--=============== FAVICON ===============-->
+   <link rel="shortcut icon" href="assets/img/logo/MELICO LOGO 2.png" type="image/x-icon">
+
+   <!--=============== REMIXICONS ===============-->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.7.0/remixicon.css">
+
+   <!--=============== CSS ===============-->
+   <link rel="stylesheet" href="assets/css/styles.css">
+
+   <title>MELICO - Kézműves Sajtmanufaktúra</title>
+
+   <style>
+       /*=============== KUPON ÉRTESÍTŐ SÁV ===============*/
+       /* Felső figyelmeztető sáv aktív kupon esetén (JS jeleníti meg) */
+       .coupon-alert {
+           background: linear-gradient(90deg, #ffbc3f, #ff9f00);  /* Narancs-sárga átmenet */
+           color: #1a150e;                      /* Sötét szöveg a kontrasztért */
+           padding: 1rem;                          /* Belső térköz */
+           text-align: center;                     /* Középre igazított szöveg */
+           font-weight: bold;                      /* Kiemelt szöveg */
+           border-bottom: 2px solid #e68a00;    /* Alsó elválasztó vonal */
+           display: none;                       /* Alapból rejtett, JS aktiválja ha van kupon */
+       }
+
+       /*=============== IDŐZÍTŐ (VISSZASZÁMLÁLÓ) ===============*/
+       /* Kupon lejárati idejének megjelenítése */
+       #timer {
+         color: #000000;   /* Fekete szöveg */
+         font-weight: bold;
+         margin-left: 5px;    /* Kis térköz a szöveg után */
+      }
+
+      /*=============== KUPON SZÖVEG ELEMEK ===============*/
+      .coupon-main {
+         margin-right: 10px;  /* Távolság a következő elemtől */
+      }
+
+      .coupon-divider {
+         margin: 0 10px;   /* Két oldalról térköz */
+         opacity: 0.6;     /* Halványabb elválasztó */
+      }
+
+      /*=============== LEJÁRATI KIEMELÉS ===============*/
+      .coupon-expiry {
+         background: rgb(255, 0, 81);  /* Figyelemfelkeltő piros háttér */
+         padding: 3px 8px;                /* Kis belső tér */
+         border-radius: 6px;              /* Lekerekített sarkok */
+      }
+
+      #timer {
+         font-family: monospace; /* Digitális hatás */
+         font-size: 1.2rem;      /* Kicsit nagyobb méret */
+         margin-left: 5px;       /* Kis térköz a szöveg után */
+      }
+   </style>
+</head>
+<body>
