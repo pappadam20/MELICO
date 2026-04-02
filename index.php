@@ -320,3 +320,160 @@ if (isset($_POST['add_to_cart'])) {
    </style>
 </head>
 <body>
+
+   <!--==================== OLDAL FELÉPÍTÉSE (HEADER - MAIN - FOOTER) ====================-->
+   <!-- 
+   Ez a fájl a webáruház főoldalának teljes szerkezetét tartalmazza, amely három fő részre tagolódik:
+
+   1. HEADER (Fejléc):
+      - Tartalmazza a logót és a navigációs menüt.
+      - Dinamikusan kezeli az aktív oldalt (PHP segítségével).
+      - Jogosultság alapú megjelenítés:
+         -> Admin menüpont csak admin felhasználóknak jelenik meg.
+         -> Bejelentkezett felhasználók profil ikonja látható.
+         -> Nem bejelentkezett felhasználók számára bejelentkezés gomb jelenik meg.
+      - Kosár ikon mutatja a kiválasztott termékek darabszámát.
+      - Reszponzív (mobilon hamburger menüvel működik).
+
+   2. MAIN (Fő tartalom):
+      Több különálló szekcióból épül fel:
+
+      - Kupon visszaszámláló:
+      Csak akkor jelenik meg, ha a felhasználónak aktív kuponja van.
+      Dinamikusan mutatja a lejárati időt.
+
+      - Home (Hero szekció):
+      Nyitó rész háttérképpel, navigációs gyorslinkekkel és CTA gombbal.
+
+      - Újdonságok:
+      Adatbázisból lekért legfrissebb termékek (TOP 3).
+      PHP ciklus generálja, AI összefoglalóval.
+
+      - Rólunk:
+      Rövid bemutatkozás a cégről és link a részletes oldalra.
+
+      - Kedvencek:
+      Legnépszerűbb termékek (eladások alapján).
+      Tartalmazza:
+         -> dinamikus árkalkulációt (kuponnal/kupon nélkül)
+         -> készlet alapú vizuális jelölést
+         -> kosárba helyezés funkciót
+         -> kupon felhasználási limit kezelését
+
+      - Vélemények:
+      Statikus vásárlói visszajelzések megjelenítése.
+
+      - Kapcsolat (CTA):
+      Felhívás kapcsolatfelvételre külön szekcióban.
+
+   3. FOOTER (Lábléc):
+      - Céginformációk (név, leírás)
+      - Cím és nyitvatartás
+      - Kapcsolati adatok
+      - Közösségi média linkek
+      - Copyright
+
+   TECHNIKAI JELLEMZŐK:
+   - PHP + MySQL alapú dinamikus adatkezelés
+   - Session kezelés (felhasználó, kosár, kuponok)
+   - Reszponzív kialakítás
+   - Dinamikus tartalomgenerálás (SQL lekérdezések)
+   - Felhasználói jogosultság kezelés (admin / vásárló)
+   - UI/UX elemek: visszajelzések, animációk, állapotjelzések
+
+   A struktúra célja egy modern, felhasználóbarát és jól skálázható webáruház főoldal megvalósítása.
+   -->
+
+
+
+
+   <!--==================== HEADER ====================-->
+   <!-- A fejléc tartalmazza a logót és a navigációs menüt -->
+   <header class="header" id="header">
+   <nav class="nav container">
+
+      <!-- LOGÓ -->
+      <!-- A főoldalra navigál -->
+      <a href="index.php" class="nav__logo">
+         <img src="assets/img/logo/MELICO LOGO.png" alt="MELICO Logo" />
+      </a>
+
+      <!-- NAVIGÁCIÓS MENÜ -->
+      <div class="nav__menu" id="nav-menu">
+         <ul class="nav__list">
+
+            <!-- MENÜPONTOK -->
+            <!-- Aktív oldal kiemelése PHP-val -->
+            <li class="nav__item">
+               <a href="index.php" class="nav__link <?php echo basename($_SERVER['PHP_SELF'])=='index.php' ? 'active-link' : ''; ?>">Főoldal</a>
+            </li>
+
+            <li class="nav__item">
+               <a href="termekeink.php" class="nav__link <?php echo basename($_SERVER['PHP_SELF'])=='termekeink.php' ? 'active-link' : ''; ?>">Termékeink</a>
+            </li>
+
+            <li class="nav__item">
+               <a href="rolunk.php" class="nav__link <?php echo basename($_SERVER['PHP_SELF'])=='rolunk.php' ? 'active-link' : ''; ?>">Rólunk</a>
+            </li>
+
+            <li class="nav__item">
+               <a href="kapcsolatfelvetel.php" class="nav__link <?php echo basename($_SERVER['PHP_SELF'])=='kapcsolatfelvetel.php' ? 'active-link' : ''; ?>">Kapcsolatfelvétel</a>
+            </li>
+
+            <!-- ADMIN MENÜ (csak adminok látják) -->
+            <?php if($isAdmin): ?>
+            <li class="nav__item">
+               <a href="admin.php" class="nav__link <?php echo basename($_SERVER['PHP_SELF'])=='admin.php' ? 'active-link' : ''; ?>">Admin</a>
+            </li>
+            <?php endif; ?>
+
+            <!-- FELHASZNÁLÓ KEZELÉS -->
+            <!-- Ha be van jelentkezve -> profil ikon -->
+            <!-- Ha nincs -> bejelentkezés gomb -->
+            <li class="nav__item">
+               <?php if (isset($_SESSION['user_id'])): ?>
+                  <a href="profil.php" class="nav__link nav__profile">
+                        <i class="ri-user-line"></i>
+                  </a>
+               <?php else: ?>
+                  <a href="signIn.php" class="nav__signin button">Bejelentkezés</a>
+               <?php endif; ?>
+            </li>
+
+            <!-- KUPON ÉS KOSÁR (nem adminnak) -->
+            <?php if (!$isAdmin): ?>
+               <li class="nav__item">
+                  <a href="kupon.php" class="nav__link <?php echo basename($_SERVER['PHP_SELF'])=='kupon.php' ? 'active-link' : ''; ?>">
+                     <i class="ri-coupon-2-line"></i>
+                  </a>
+               </li>
+
+               <!-- KOSÁR IKON + DARABSZÁM -->
+               <li class="nav__item">
+                   <a href="kosar.php" class="nav__link"><i class="ri-shopping-cart-fill"></i>
+                   <?php 
+                   $total_items = 0;
+                   if (!empty($_SESSION['cart'])) {
+                       foreach ($_SESSION['cart'] as $item) {
+                           $total_items += $item['quantity'];
+                       }
+                       if ($total_items > 0) echo "($total_items)";
+                   }
+                   ?>
+                   </a>
+               </li>
+            <?php endif; ?>
+         </ul>
+
+         <!-- MOBIL MENÜ BEZÁRÓ GOMB -->
+         <div class="nav__close" id="nav-close"><i class="ri-close-line"></i></div>
+
+         <!-- Díszítő képek -->
+         <img src="assets/img/cheese2.png" alt="image" class="nav__img-1">
+         <img src="assets/img/cheese1.png" alt="image" class="nav__img-2">
+      </div>
+
+      <!-- MOBIL MENÜ NYITÓ GOMB -->
+      <div class="nav__toggle" id="nav-toggle"><i class="ri-menu-fill"></i></div>
+   </nav>
+</header>
