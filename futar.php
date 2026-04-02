@@ -140,3 +140,33 @@ if (isset($_POST['complete_order'])) {
         exit();
     }
 }
+
+
+
+/*=============== RENDELÉSEK LEKÉRDEZÉSE ===============*/
+/*
+    Cél:
+    Az aktív (még le nem zárt) rendelések lekérdezése az adatbázisból,
+    valamint a hozzájuk tartozó végösszeg kiszámítása.
+
+    A lekérdezés az alábbi adatokat adja vissza:
+    - rendelés azonosító (O.id)
+    - rendelés dátuma (O.date)
+    - rendelés státusza (O.status)
+    - felhasználó neve és email címe
+    - felhasználó szállítási címe
+    - felhasználó azonosító (uid)
+    - rendelés teljes összege (total_sum)
+
+    Megjegyzés:
+    A total_sum egy al-lekérdezéssel kerül kiszámításra,
+    amely az ORDER_ITEMS táblában lévő tételek mennyiség * eladási ár összegét adja vissza.
+*/
+$sql = "SELECT O.id, O.date, O.status, U.name, U.email, U.location, U.id as uid,
+        (SELECT SUM(quantity * sale_price) FROM ORDER_ITEMS WHERE order_id = O.id) as total_sum
+        FROM ORDERS O 
+        JOIN USERS U ON O.user_id = U.id 
+        WHERE O.status IN ('Megrendelve', 'Szállítás alatt')
+        ORDER BY O.date DESC";
+$orders_res = $conn->query($sql);
+?>
