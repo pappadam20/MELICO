@@ -617,3 +617,141 @@ if (isset($_POST['add_to_cart'])) {
             <img src="assets/img/about-melico.jpg" alt="image" class="about-img">
          </div>
       </section>
+      
+
+
+      <!--==================== KEDVENCEK ====================-->
+      <!-- Legnépszerűbb termékek (eladások alapján) -->
+
+      <?php if (isset($_SESSION['error'])): ?>
+         <p style="color:red; text-align:center; margin:15px 0;">
+            <?= $_SESSION['error']; ?>
+         </p>
+         <?php unset($_SESSION['error']); ?>
+      <?php endif; ?>
+
+      <section class="favorite section" id="favorite">
+
+         <h2 class="section__title">Vásárlói Kedvencek</h2>
+
+         <!-- PHP generálja TOP 3 terméket -->
+         <div class="favorite__container container grid">
+            <?php
+            $sql = "
+                  SELECT p.id, p.name, p.price, p.stock, p.category_id, c.name AS category_name,
+                        COALESCE(SUM(oi.quantity),0) AS total_sold, p.image
+                  FROM PRODUCTS p
+                  JOIN CATEGORIES c ON p.category_id = c.id
+                  LEFT JOIN ORDER_ITEMS oi ON p.id = oi.product_id
+                  GROUP BY p.id
+                  ORDER BY total_sold DESC
+                  LIMIT 3
+            ";
+
+            $result = $conn->query($sql);
+
+            if ($result && $result->num_rows > 0) {
+                  while ($row = $result->fetch_assoc()) {
+                     $product_id = (int)$row['id'];
+                     $product_name = htmlspecialchars($row['name']);
+                     $category_name = htmlspecialchars($row['category_name']);
+                     $category_id = (int)$row['category_id'];
+                     
+                     // --- VIZUÁLIS ÁR KALKULÁCIÓ ---
+                     $original_price = $row['price'];
+                     $price_after_discount = $original_price;
+                     if ($discount > 0) {
+                        $price_after_discount = $original_price * (1 - ($discount / 100));
+                     }
+
+                     if ($row['stock'] > 15) { $stockClass = "stock-high"; } 
+                     elseif ($row['stock'] > 0) { $stockClass = "stock-medium"; } 
+                     else { $stockClass = "stock-zero"; }
+
+                     $imgPath = "assets/img/category_{$category_id}/" . $row['image'];
+                     if (!file_exists($imgPath) || empty($row['image'])) {
+                        $imgPath = "assets/img/no-image.png";
+                     }
+            ?>
+                     <article class="favorite__card <?= $stockClass ?>">
+                        <a href="termek.php?id=<?= $product_id ?>&from=index.php">
+                           <img src="<?= $imgPath ?>" class="favorite__img" alt="<?= $product_name ?>">
+                        </a>
+
+                        <div class="favorite__data">
+                           <h2 class="favorite__title"><?= $product_name ?></h2>
+                           <span class="favorite__subtitle"><?= $category_name ?></span>
+                           
+                           <h3 class="favorite__price">
+
+                           <?php
+                           // KVÓTA SZÁMOLÁS
+                           $already_bought_discounted = 0;
+
+                           if (isset($_SESSION['user_id']) && $discount > 0) {
+                              $check_stmt = $conn->prepare("
+                                 SELECT SUM(oi.quantity) as total 
+                                 FROM ORDER_ITEMS oi
+                                 JOIN ORDERS o ON oi.order_id = o.id
+                                 WHERE o.user_id = ? AND oi.product_id = ? AND oi.sale_price < ?
+                              ");
+                              $check_stmt->bind_param("iid", $_SESSION['user_id'], $product_id, $original_price);
+                              $check_stmt->execute();
+                              $res_bought = $check_stmt->get_result()->fetch_assoc();
+                              $already_bought_discounted = $res_bought['total'] ?? 0;
+                              $check_stmt->close();
+                           }
+
+                           $discount_key = $product_id . "_discounted";
+                           $already_in_cart_discounted = $_SESSION['cart'][$discount_key]['quantity'] ?? 0;
+
+                           $total_used_quota = $already_bought_discounted + $already_in_cart_discounted;
+
+                           $show_discount = ($discount > 0 && $total_used_quota < $max_discounted_items);
+                           $price_after_discount = $original_price * (1 - $discount / 100);
+                           ?>
+
+                           <?php if ($show_discount): ?>
+
+                              <span style="text-decoration: line-through; color: #aaa; font-size: 0.8rem;">
+                                 <?= number_format($original_price, 0, '', ' ') ?> Ft
+                              </span>
+                              <span style="color: #ffbc3f;"> 
+                                 <?= number_format($price_after_discount, 0, '', ' ') ?> Ft/kg
+                              </span>
+                              <br>
+                              <small style="font-weight:bold; color:#f7ff8c;">
+                                 Maradt: <?= $max_discounted_items - $total_used_quota ?> db
+                              </small>
+
+                           <?php else: ?>
+
+                              <?= number_format($original_price, 0, '', ' ') ?> Ft/kg
+
+                              <?php if ($discount > 0 && $total_used_quota >= 4): ?>
+                                 <br>
+                                 <small style="color:red; font-weight:bold;">
+                                       Nincs több kuponod!
+                                 </small>
+                              <?php endif; ?>
+
+                           <?php endif; ?>
+
+                           </h3>
+                        </div>
+
+                        <?php if(isset($_SESSION['role']) && $_SESSION['role'] == '0'): ?>
+                        <form method="POST">
+                           <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                           <button type="submit" name="add_to_cart" class="favorite__button button">
+                              <i class="ri-add-line"></i>
+                           </button>
+                        </form>
+                     <?php endif; ?>
+                  </article>
+            <?php
+                  }
+            }
+            ?>
+         </div>
+      </section>
