@@ -53,3 +53,90 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != '1') {
 
 /* Admin ellenőrzés (esetleges extra funkciókhoz) */
 $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
+
+
+
+/*=============== RENDELÉS TELJESÍTÉS LOGIKA ===============*/
+/* Ha a futár rákattint a "kiszállítva" gombra */
+if (isset($_POST['complete_order'])) {
+
+    /* Rendelés státuszának frissítése */
+    $finish = $conn->prepare("UPDATE ORDERS SET status = 'Kiszállítva' WHERE id = ?");
+    $finish->bind_param("i", $order_id);
+    
+    if ($finish->execute()) {
+
+        /*=============== HŰSÉGPROGRAM LOGIKA ===============*/
+        /*
+            Ez a függvény ellenőrzi a felhasználó eddigi költését,
+            és ha elér egy bizonyos összeget, kupont generál számára.
+        */
+        function checkAndGenerateUserCouponsLocal($userId, $conn) {
+
+            /* Rendszerbeállítások lekérése */
+            $set_res = $conn->query("SELECT loyalty_threshold, coupon_percent FROM SETTINGS LIMIT 1");
+            $settings = $set_res->fetch_assoc();
+
+            $threshold = $settings['loyalty_threshold'] ?? 49999;
+            $discount_pct = $settings['coupon_percent'] ?? 10;
+
+            /* Összes eddigi költés kiszámítása */
+            $stmt = $conn->prepare("
+                SELECT SUM(OI.quantity * OI.sale_price) as total_money
+                FROM ORDERS O
+                JOIN ORDER_ITEMS OI ON O.id = OI.order_id
+                WHERE O.user_id = ? AND O.status = 'Kiszállítva'
+            ");
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+
+            $total_money = $stmt->get_result()->fetch_assoc()['total_money'] ?? 0;
+            $stmt->close();
+
+            /* Meghatározzuk hány kupon jár */
+            $coupon_level = floor($total_money / $threshold);
+
+            /* Megnézzük eddig hány kupont kapott */
+            $count_stmt = $conn->prepare("SELECT COUNT(*) as c FROM USER_COUPONS WHERE user_id = ?");
+            $count_stmt->bind_param("i", $userId);
+            $count_stmt->execute();
+
+            $existing_coupons = $count_stmt->get_result()->fetch_assoc()['c'];
+            $count_stmt->close();
+
+            /* Ha több kupon jár, mint amennyit kapott → generálunk */
+            if ($coupon_level > $existing_coupons) {
+                $needed = $coupon_level - $existing_coupons;
+                for ($i = 0; $i < $needed; $i++) {
+
+                    /* Egyedi kuponkód generálása */
+                    $code = "LOYALTY-" . strtoupper(bin2hex(random_bytes(3)));
+
+                    /* Lejárati dátum (7 nap) */
+                    $expiry = date('Y-m-d H:i:s', strtotime('+7 days'));
+                    
+                    /* Kupon mentése */
+                    $ins_c = $conn->prepare("INSERT INTO COUPONS (code, discount, valid_until) VALUES (?, ?, ?)");
+                    $ins_c->bind_param("sis", $code, $discount_pct, $expiry);
+                    $ins_c->execute();
+
+                    $coupon_id = $ins_c->insert_id;
+                    $ins_c->close();
+
+                    /* Kupon hozzárendelése felhasználóhoz */
+                    $ins_uc = $conn->prepare("INSERT INTO USER_COUPONS (user_id, coupon_id) VALUES (?, ?)");
+                    $ins_uc->bind_param("ii", $userId, $coupon_id);
+                    $ins_uc->execute();
+                    $ins_uc->close();
+                }
+            }
+        }
+
+        /* Függvény futtatása */
+        checkAndGenerateUserCouponsLocal($order['uid'], $conn);
+
+        /* Visszairányítás siker esetén */
+        header("Location: futar.php?success=delivered");
+        exit();
+    }
+}
