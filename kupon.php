@@ -142,3 +142,142 @@ if(isset($_POST['redeem_coupon'])) {
     }
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--=============== OLDAL CÍM ===============-->
+    <title>Kupon Beváltása - MELICO</title>
+
+    <!--=============== KÜLSŐ STÍLUSOK ===============-->
+    <link rel="stylesheet" href="assets/css/styles.css">
+
+    <!-- Ikonok (Remix Icon) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.7.0/remixicon.css">
+
+
+    <!--=============== INLINE STÍLUSOK (KUPÓN OLDAL DESIGN) ===============-->
+    <style>
+    /*
+    Ez az oldal egy különálló kupon beváltó felület,
+    amely egyszerű, sötét témájú UI-t használ.
+    */
+
+        body { 
+            background: #000; 
+            font-family: 'Poppins', sans-serif; 
+            color: #fff; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        /* Fő cím */
+        h1 { 
+            text-align: center; 
+            margin: 40px 0 20px 0; 
+            color: #fff; 
+            font-size: 2rem; 
+        }
+
+        /* Kupon űrlap kártya */
+        .profile-card { 
+            background-color: #111; 
+            border-radius: 10px; 
+            max-width: 500px; 
+            margin: 0 auto 50px auto; 
+            padding: 30px 25px; 
+            box-shadow: 0 5px 25px rgba(255,255,255,0.05); 
+            border: 1px solid #222; 
+        }
+
+        /* Input címkék */
+        label { 
+            color: #ffbc3f; 
+            font-weight: bold; 
+            display: block; 
+            margin-bottom: 5px; 
+        }
+
+        /* Input mező */
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0 20px 0; 
+            border-radius: 6px; 
+            border: 1px solid #333; 
+            background: #1a1a1a; 
+            color: #fff; 
+            font-size: 1rem; 
+            outline: none; 
+        }
+
+        /* Input fókusz állapot */
+        input:focus { 
+            border-color: #175e69; 
+        }
+
+        /* Gomb */
+        .button { 
+            padding: 12px; 
+            background-color: #175e69; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            width: 100%; 
+            font-size: 1rem; 
+            transition: 0.3s; 
+        }
+
+        /* Gomb hover effekt */
+        .button:hover { 
+            background-color: #00b2cd; 
+            transform: translateY(-2px); 
+        }
+
+        /* Üzenet alap stílus */
+        .msg { 
+            padding: 12px; 
+            border-radius: 6px; 
+            margin-bottom: 20px; 
+            text-align: center; 
+            font-weight: bold; 
+        }
+
+        /* Sikeres művelet üzenet */
+        .success { 
+            background-color: rgba(40, 167, 69, 0.2); 
+            color: #28a745; 
+            border: 1px solid #28a745; 
+        }
+
+        /* Hibaüzenet */
+        .error { 
+            background-color: rgba(220, 53, 69, 0.2); 
+            color: #dc3545; 
+            border: 1px solid #dc3545; 
+        }
+
+        /* Vissza gomb */
+        .nav__back { 
+            display: inline-flex; 
+            align-items: center; 
+            column-gap: 0.5rem; color: #fff; 
+            font-weight: bold; 
+            text-decoration: none; 
+            margin: 20px 25px; 
+            transition: 0.3s; 
+        }
+
+        /* Vissza gomb hover */
+        .nav__back:hover { 
+            color: #ffbc3f; 
+        }
+
+    </style>
+</head>
+<body>
