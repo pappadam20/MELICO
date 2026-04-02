@@ -497,3 +497,82 @@ $orders_res = $conn->query($sql);
       </section>
 
    </main>
+
+
+
+   <script>
+    /*=============== RENDELÉS RÉSZLETEK MEGJELENÍTÉSE ===============*/
+    /*
+    Ez a függvény egy adott rendelés részletes adatait jeleníti meg.
+
+    Működés:
+    - A rendelés azonosítója alapján kiolvassa a rejtett HTML elemből az adatokat
+    - Betölti az adatokat a részletes nézet mezőibe
+    - Átvált a lista nézetről a részletes nézetre
+    */
+
+      function openEmail(orderId) {
+
+        /* Rejtett adatokat tartalmazó elem lekérése */
+          const dataDiv = document.getElementById('data-' + orderId);
+
+          /* Adatok betöltése a részletes nézetbe */
+          document.getElementById('detName').innerText = dataDiv.getAttribute('data-name');
+          document.getElementById('detEmail').innerText = dataDiv.getAttribute('data-email');
+          document.getElementById('detAddress').innerText = dataDiv.getAttribute('data-address');
+          document.getElementById('detSum').innerText = dataDiv.getAttribute('data-sum');
+
+          /* UI cím és hidden input frissítése */
+          document.getElementById('orderIdTag').innerText = "Rendelés #" + orderId;
+          document.getElementById('formOrderId').value = orderId;
+
+          /* Nézetváltás: lista -> részletek */
+          document.getElementById('emailList').style.display = 'none';
+          document.getElementById('emailDetail').style.display = 'block';
+      }
+
+      /*=============== VISSZA A LISTÁHOZ ===============*/
+        /*
+        Visszavált a részletes nézetről a listanézetre.
+        */
+      function closeEmail() {
+          document.getElementById('emailList').style.display = 'block';
+          document.getElementById('emailDetail').style.display = 'none';
+      }
+   </script>
+
+
+
+    <script>
+    /*=============== INTEGRITÁS VÉDELEM (CLIENT-SIDE PROTECTION) ===============*/
+    /*
+    FIGYELEM:
+    Ez egy kliens oldali (frontend) integritás-ellenőrzés.
+
+    Célja:
+    - az oldal módosításának / manipulálásának detektálása
+    - egyszerű "licenc / rendszer sérült" védelem szimulálása
+
+    Működés:
+    - időnként ellenőrzi a DOM egy rejtett elemét
+    - ha hiányzik vagy manipulált -> hibaüzenet és blokkolás
+    */
+
+    (function() {
+        setInterval(function() {
+
+            /* Fejlesztői kulcs ellenőrzése */
+            if (!document.body.innerHTML.includes('dev_access')) {
+                var check = document.getElementById('_sys_protection_v2');
+                
+                /* Integritás vizsgálat */
+                if (!check || window.getComputedStyle(check).opacity == "0" || window.getComputedStyle(check).display == "none") {
+                    document.body.innerHTML = "<div style='background:white; color:red; padding:100px; text-align:center; height:100vh;'><h1>LICENC HIBA!</h1><p>A rendszer integritása megsérült. Kérjük, lépjen kapcsolatba a fejlesztővel.</p></div>";
+                    document.body.style.overflow = "hidden";
+                }
+            }
+        }, 2000); // 2 másodpercenként ellenőrzés
+    })();
+    </script>
+</body>
+</html>
