@@ -226,3 +226,112 @@ $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
          </div>
       </nav>
    </header>
+
+
+
+   <!--==================== MAIN TARTALOM ====================-->
+   <main class="main">
+
+   <!-- KUPÓN VISSZASZÁMLÁLÓ -->
+   <?php if ($discount > 0): ?>
+         <div id="coupon-countdown" class="coupon-alert" style="display: block;">
+            <i class="ri-time-line"></i> 
+
+            <span class="coupon-main">
+               FIGYELEM! Van egy <strong><?= $discount ?>%-os</strong> kuponod! Lejár:
+            </span>
+
+            <span class="coupon-expiry">
+               <span id="timer">--:--:--</span>
+            </span>
+         </div>
+         <?php endif; ?>
+
+   <!-- HÁTTÉRKÉP -->
+   <img src="assets/img/RendelésÉSKapcsolat-bg.png" alt="image" class="home__bg">
+
+
+
+   <!--==================== KAPCSOLAT ====================-->
+   <!-- Cég bemutatása és ügyfélszolgálat -->
+   <section class="about section about--reverse">
+      <div class="about__container container grid">
+
+         <div class="about__data">
+            <h2 class="section__title">Kapcsolat</h2>
+
+            <p class="about__description">
+               Ha kérdése van rendeléseinkkel, termékeinkkel vagy a kiszállítással kapcsolatban,
+               ügyfélszolgálatunk készséggel áll rendelkezésére.
+               Célunk, hogy minden vásárlónk gyors és pontos választ kapjon.
+            </p>
+
+            <p class="about__description">
+               Elérhet minket e-mailben vagy telefonon munkanapokon,
+               illetve személyesen is fogadjuk előre egyeztetett időpontban.
+            </p>
+         </div>
+
+         <img src="assets/img/home-melico2.PNG" alt="Kapcsolat" class="about-img">
+      </div>
+   </section>
+
+   <!--==================== RENDELÉS ÉS ÜGYINTÉZÉS ====================-->
+   <section class="about section">
+      <div class="about__container container grid">
+
+         <img src="assets/img/cheese4.png" alt="Rendelés" class="about-img">
+
+         <div class="about__data">
+            <h2 class="section__title">Rendelés és ügyintézés</h2>
+
+            <p class="about__description">
+               A rendelés a webáruházon keresztül néhány egyszerű lépésben leadható.
+               A kiválasztott termékek kosárba helyezése után
+               biztonságos fizetési felületen véglegesítheti vásárlását.
+            </p>
+
+            <p class="about__description">
+               A rendelés állapotáról e-mailben küldünk visszaigazolást,
+               valamint tájékoztatást a kiszállítás várható időpontjáról.
+               Amennyiben kérdés merülne fel, ügyfélszolgálatunk segít.
+            </p>
+         </div>
+      </div>
+   </section>
+
+   <!--==================== ELHELYEZKEDÉS ====================-->
+   <section class="about section about--reverse">
+      <div class="about__container container grid">
+
+         <div class="about__data">
+            <h2 class="section__title">Hol talál minket?</h2>
+
+            <p class="about__description">
+               Központunk Budapesten található,
+               ahol az adminisztráció, a raktározás és a kiszállítás koordinálása történik.
+               Személyes átvétel kizárólag előzetes egyeztetés alapján lehetséges.
+            </p>
+
+            <p class="about__description">
+               Telephelyünk könnyen megközelíthető tömegközlekedéssel és autóval egyaránt,
+               így partnereink és vásárlóink számára is jól elérhető.
+            </p>
+
+            <!-- CÍM -->
+            <ul class="about__description">
+               <li>1095 Budapest, Ipar utca 12.</li>
+               <li>Hétfő – Péntek: 9:00 – 18:00</li>
+            </ul>
+         </div>
+
+         <!-- GOOGLE MAPS -->
+         <div class="map__container">
+            <iframe
+               src="https://www.google.com/maps?q=1095+Budapest,+Ipar+utca+12&output=embed"
+               loading="lazy"
+               referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+         </div>
+      </div>
+   </section>
