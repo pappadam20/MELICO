@@ -281,3 +281,36 @@ if(isset($_POST['redeem_coupon'])) {
     </style>
 </head>
 <body>
+
+    <!--=============== FEJLÉC ===============-->
+    <header>
+        <nav class="nav container">
+            <!-- Vissza navigáció (dinamikus PHP útvonal) -->
+            <a href="<?= htmlspecialchars($back_url) ?>" class="nav__back">
+                <i class="ri-arrow-left-line"></i> Vissza
+            </a>
+        </nav>
+    </header>
+
+    <!--=============== OLDAL CÍM ===============-->
+    <h1>Kupon Beváltása</h1>
+
+    <!--=============== FŐ TARTALOM (ŰRLAP KÁRTYA) ===============-->
+    <div class="profile-card">
+        <!-- Sikeres üzenet megjelenítése -->
+        <?php if($success_msg): ?>
+            <div class="msg success"><?= $success_msg ?></div>
+        <?php endif; ?>
+        
+        <!-- Hibaüzenet megjelenítése -->
+        <?php if($error_msg): ?>
+            <div class="msg error"><?= $error_msg ?></div>
+        <?php endif; ?>
+
+        <!-- Kupon beváltó űrlap -->
+        <form method="POST">
+            <label for="coupon_code">Kupon kód:</label>
+            <input type="text" id="coupon_code" name="coupon_code" placeholder="Például: MELICO20" required autocomplete="off">
+            <button type="submit" name="redeem_coupon" class="button">Beváltás</button>
+        </form>
+    </div>
