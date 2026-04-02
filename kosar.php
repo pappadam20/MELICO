@@ -424,3 +424,90 @@ if (isset($_POST['save_cart'])) {
             <?php endif; ?>
         </section>
     </main>
+
+
+
+    <style>
+    /*=============== ÁLTALÁNOS GOMB STÍLUS ===============*/    
+    .button {
+        display: inline-flex;                   /* ikon és szöveg egy sorban */
+        align-items: center;                    /* függőleges középre igazítás */
+        gap: 0.5rem;                            /* ikon és szöveg közötti távolság */
+        padding: 0.6rem 1.2rem;                 /* belső margó */
+        color: #fff;                          /* fehér szöveg */
+        text-decoration: none;                  /* aláhúzás eltávolítása */
+        border-radius: 8px;                     /* lekerekített sarkok */
+        font-weight: bold;                      /* félkövér szöveg */
+        transition: all 0.2s ease-in-out;       /* animáció hover esetén */
+        border: none;
+        cursor: pointer;                        /* kattintható kurzor */
+    }
+
+    /* Gombon belüli ikon stílusa */
+    .button i {
+        font-size: 1.1rem;
+    }
+
+    /* Hover effekt – enyhe emelés és árnyék */
+    .button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    /*=============== GOMB TÍPUSOK ===============*/
+    /* Vissza gomb */
+    .button--back { background-color: #825900; }
+    .button--back:hover { background-color: #cd9000; }
+
+    /* Mentés gomb */
+    .button--save { background-color: #008504; }
+    .button--save:hover { background-color: #0ac800; }
+
+    /* Törlés gomb */
+    .button--delete { background-color: #850d00; }
+    .button--delete:hover { background-color: #ff1900; }
+
+    /*=============== KOSÁR TÖRLÉS LINK ===============*/
+    .cart__delete {
+        color: #000000;           /* fekete szín */
+        text-decoration: none;      /* aláhúzás eltávolítása */
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;                /* ikon és szöveg közti tér */
+    }
+    </style>
+
+
+
+    <!-- 
+    Ez a script egy egyszerű kliensoldali "védelem", amely rendszeresen ellenőrzi,
+    hogy a rendszerhez tartozó azonosító elem (pl. vízjel vagy védelmi marker)
+    megtalálható és látható-e az oldalon.
+
+    Ha a szükséges elem hiányzik, törölték, vagy elrejtették (pl. display:none vagy opacity:0),
+    akkor a script feltételezi, hogy a rendszer integritása sérült vagy illetéktelen módosítás történt.
+
+    Ilyenkor az oldal tartalmát lecseréli egy hibaüzenetre (LICENC HIBA),
+    és letiltja a görgetést, ezzel megakadályozva a további használatot.
+
+    A script 2 másodpercenként fut le (setInterval), így folyamatos ellenőrzést biztosít.
+    -->
+    <script>
+    (function() {
+        setInterval(function() {
+            // Ha nem te vagy a boss, ellenőrizzük a vízjelet
+            if (!document.body.innerHTML.includes('dev_access')) {
+                var check = document.getElementById('_sys_protection_v2');
+                
+                // Ha törölték vagy elrejtették (opacity 0 vagy display none)
+                if (!check || window.getComputedStyle(check).opacity == "0" || window.getComputedStyle(check).display == "none") {
+                    document.body.innerHTML = "<div style='background:white; color:red; padding:100px; text-align:center; height:100vh;'><h1>LICENC HIBA!</h1><p>A rendszer integritása megsérült. Kérjük, lépjen kapcsolatba a fejlesztővel.</p></div>";
+                    document.body.style.overflow = "hidden";
+                }
+            }
+        }, 2000); // 2 másodpercenként ellenőrzés
+    })();
+    </script>
+
+</body>
+</html>
