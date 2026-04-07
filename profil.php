@@ -238,3 +238,149 @@ if (isset($_POST['change_password'])) {
         }
     }
 }
+
+
+
+/*========================================================
+  FELHASZNÁLÓ ADATOK LEKÉRÉSE
+========================================================*/
+$stmt = $conn->prepare("SELECT name, profile_name, location, email, role FROM USERS WHERE id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
+
+if (!$user) {
+    session_destroy();
+    header("Location: signIn.php");
+    exit();
+}
+
+$isAdmin = ($user['role'] == '2');
+
+
+
+/*========================================================
+  KUPON RENDSZER (SZEMÉLYES + GLOBÁLIS)
+========================================================*/
+
+/* Személyes kupon */
+$personal_coupon = null;
+if ($user['role'] == '0') {
+    $personal_coupon_query = "
+        SELECT C.id, C.code, C.discount, C.valid_until 
+        FROM USER_COUPONS UC
+        JOIN COUPONS C ON UC.coupon_id = C.id
+        WHERE UC.user_id = ? AND UC.used = 0 AND C.valid_until >= NOW()
+        ORDER BY UC.assigned_at DESC LIMIT 1";
+
+    $p_stmt = $conn->prepare($personal_coupon_query);
+    $p_stmt->bind_param("i", $user_id);
+    $p_stmt->execute();
+    $personal_coupon = $p_stmt->get_result()->fetch_assoc();
+    $p_stmt->close();
+}
+
+
+// --- GLOBÁLIS AKTÍV KUPON LEKÉRÉSE ---
+$now = date("Y-m-d H:i:s");
+$global_coupon_query = "SELECT id, code, discount, valid_until FROM COUPONS 
+                        WHERE valid_until >= ? 
+                        ORDER BY id DESC LIMIT 1";
+$g_stmt = $conn->prepare($global_coupon_query);
+$g_stmt->bind_param("s", $now);
+$g_stmt->execute();
+$global_coupon = $g_stmt->get_result()->fetch_assoc();
+
+$is_global_used = false;
+if ($global_coupon) {
+    // Ellenőrizzük, hogy a felhasználó felhasználta-e már ezt a konkrét globális kupont
+    $check_used = $conn->prepare("SELECT id FROM USER_COUPONS WHERE user_id = ? AND coupon_id = ? AND used = 1");
+    $check_used->bind_param("ii", $user_id, $global_coupon['id']);
+    $check_used->execute();
+    if ($check_used->get_result()->num_rows > 0) {
+        $is_global_used = true;
+    }
+}
+
+// 5. RENDELÉSEK LEKÉRÉSE
+$order_query = $conn->prepare("
+    SELECT 
+        O.id, 
+        O.date, 
+        O.status, 
+        SUM(OI.quantity * OI.sale_price) AS total_price,
+        GROUP_CONCAT(CONCAT(P.name, ' (', C.name, ') - ', OI.quantity, ' db') SEPARATOR '<br>') AS items_details
+    FROM ORDERS O
+    LEFT JOIN ORDER_ITEMS OI ON O.id = OI.order_id
+    LEFT JOIN PRODUCTS P ON OI.product_id = P.id
+    LEFT JOIN CATEGORIES C ON P.category_id = C.id
+    WHERE O.user_id = ? 
+    GROUP BY O.id 
+    ORDER BY O.date DESC
+");
+$order_query->bind_param("i", $user_id);
+$order_query->execute();
+$orders = $order_query->get_result();
+
+// =================== 5.5 ÉRTESÍTÉSEK LEKÉRÉSE ===================
+$notif_stmt = $conn->prepare("SELECT * FROM NOTIFICATIONS WHERE user_id = ? ORDER BY created_at DESC");
+$notif_stmt->bind_param("i", $user_id);
+$notif_stmt->execute();
+$notif_res = $notif_stmt->get_result();
+
+$unread_count = 0;
+$all_notifs = [];
+while($n = $notif_res->fetch_assoc()){
+    if($n['is_read'] == 0) $unread_count++;
+    $all_notifs[] = $n;
+}
+// ===============================================================
+
+// =================== 5.6 KUPONOK LEKÉRÉSE ===================
+// Csak azokat a kuponokat kérjük le, amiket a user MEGKAPOTT, de MÉG NEM VÁLTOTT BE (used = 0)
+$coupon_stmt = $conn->prepare("
+    SELECT C.id, C.code, C.discount, C.valid_until 
+    FROM USER_COUPONS UC 
+    JOIN COUPONS C ON UC.coupon_id = C.id 
+    WHERE UC.user_id = ? AND UC.used = 0 AND C.valid_until >= NOW()
+    ORDER BY C.valid_until ASC
+");
+$coupon_stmt->bind_param("i", $user_id);
+$coupon_stmt->execute();
+$coupons_res = $coupon_stmt->get_result();
+$my_active_coupons = $coupons_res->fetch_all(MYSQLI_ASSOC);
+
+// ===============================================================
+
+// 6. FELHASZNÁLÓ FIÓK TÖRLÉSE
+if (isset($_POST['delete_account'])) {
+    $current_pass = $_POST['current_password'] ?? '';
+    $confirm_pass = $_POST['confirm_password'] ?? '';
+
+    if ($current_pass !== $confirm_pass) {
+        $error_msg = "A jelszavak nem egyeznek!"; // Hiba, ha nem egyezik
+    } else {
+        // Lekérjük a jelenlegi jelszót az adatbázisból
+        $stmt = $conn->prepare("SELECT password FROM USERS WHERE id=?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $hashed_password = $result['password'];
+
+        if (!password_verify($current_pass, $hashed_password)) {
+            $error_msg = "Hibás jelszó! A fiók nem lett törölve.";
+        } else {
+            // Fiók törlése
+            $stmt = $conn->prepare("DELETE FROM USERS WHERE id=?");
+            $stmt->bind_param("i", $user_id);
+            if ($stmt->execute()) {
+                session_destroy();
+                header("Location: index.php?msg=account_deleted");
+                exit();
+            } else {
+                $error_msg = "Hiba történt a fiók törlése közben.";
+            }
+        }
+    }
+}
+?>
