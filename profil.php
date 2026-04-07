@@ -649,3 +649,334 @@ if (isset($_POST['delete_account'])) {
     </style>
 </head>
 <body>
+
+<!-- 
+================= FELHASZNÁLÓI PROFIL MODUL =================
+
+LEÍRÁS:
+Ez a modul a MELICO webalkalmazás felhasználói profilkezelő felülete.
+Célja, hogy a bejelentkezett felhasználó egy helyen kezelhesse
+adatait, rendeléseit, kuponjait és biztonsági beállításait.
+
+-------------------- FUNKCIONÁLIS EGYSÉGEK --------------------
+
+1. NAVIGÁCIÓ (HEADER)
+- Logó megjelenítése
+- Visszalépési lehetőség (dinamikus URL-lel)
+- Kijelentkezés (POST alapú biztonságos művelet)
+
+2. KUPON ÉS AKCIÓ KEZELÉS
+- Aktív kupon megjelenítése százalékos kedvezménnyel
+- Visszaszámláló (JavaScript alapú időkezelés)
+- Kuponkód másolása vágólapra (Clipboard API)
+
+3. TAB RENDSZER (FÜLEK)
+- Adatok módosítása
+- Rendelések (csak vásárlói szerepkör esetén)
+- Értesítések (olvasatlan számlálóval)
+- Kuponok
+- Biztonság
+
+4. PROFIL ADATOK KEZELÉSE
+- Profil név, email és cím módosítása
+- Biztonságos megjelenítés: htmlspecialchars() XSS védelem miatt
+
+5. RENDELÉSEK KEZELÉSE
+- Korábbi rendelések listázása
+- Termékek és végösszeg megjelenítése
+- Rendelés lemondása (csak adott státusz esetén)
+
+6. ÉRTESÍTÉSEK
+- Dinamikus lista
+- Kiemelt stílus speciális (pl. TOP vásárló) üzenetekhez
+
+7. KUPONOK KEZELÉSE
+- Felhasználóhoz tartozó kuponok listázása
+- Érvényességi idő megjelenítése
+- Gyors másolás funkció
+
+8. BIZTONSÁGI FUNKCIÓK
+- Jelszó módosítás (minimum hossz ellenőrzéssel)
+- Fiók törlés megerősítéssel
+
+-------------------- TECHNOLÓGIÁK --------------------
+
+BACKEND:
+- PHP (szerveroldali logika)
+- MySQL adatbázis (felhasználók, rendelések, kuponok)
+
+FRONTEND:
+- HTML5 (struktúra)
+- CSS3 (stílus, reszponzivitás)
+- JavaScript (interakciók)
+
+-------------------- JAVASCRIPT FUNKCIÓK --------------------
+
+- Tab váltás dinamikusan
+- Mobil menü nyitás/zárás
+- Kupon visszaszámláló (idő alapú frissítés)
+- Jelszó validáció (vizuális visszajelzés)
+- Kuponkód másolása
+
+-------------------- BIZTONSÁG --------------------
+
+- XSS védelem: htmlspecialchars()
+- POST alapú műveletek (pl. kijelentkezés, törlés)
+- Alap kliens oldali validációk
+- Integritás ellenőrző script (manipuláció védelem)
+
+-------------------- RESZPONZÍV MŰKÖDÉS --------------------
+
+- Mobilbarát navigáció
+- Rugalmas elrendezés (flexbox / grid)
+- Külön mobil menü kezelés
+
+============================================================
+-->
+
+<header class="header" id="header">
+   <nav class="nav container">
+      <a href="index.php" class="nav__logo">
+         <img src="assets/img/logo/MELICO LOGO.png" alt="MELICO Logo" />
+      </a>
+      <div class="nav__menu" id="nav-menu">
+         <ul class="nav__list">
+            <li class="nav__item">
+                <a href="<?= htmlspecialchars($back_url) ?>" class="nav__back">
+                    <i class="ri-arrow-left-line"></i> Vissza
+                </a>
+            </li>
+
+            <li class="nav__item">
+               <form method="POST" style="margin:0;">
+    <button type="submit" name="logout" class="nav__signin button" style="padding:8px 15px;">
+        Kijelentkezés
+    </button>
+</form>
+            </li>
+         </ul>
+         <div class="nav__close" id="nav-close"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="nav__toggle" id="nav-toggle"><i class="ri-menu-fill"></i></div>
+   </nav>
+</header>
+
+<h1>Felhasználói Profil</h1>
+
+<?php if($discount > 0): ?>
+<div id="coupon-countdown" style="max-width: 768px; margin: 20px auto; background: #175e69; color: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+    <i class="ri-time-line"></i>
+    <span style="font-weight:bold; margin-left:5px;">
+        FIGYELEM! Van egy <strong><?= $discount ?>%-os</strong> kuponod! Lejár:
+    </span>
+    <span id="timer" style="margin-left:5px;">--:--:--</span>
+</div>
+<?php endif; ?>
+
+
+<?php if ($user['role'] == 0 && $personal_coupon): ?>
+    <div id="global-coupon-box" style="max-width: 768px; margin: 20px auto; background: linear-gradient(135deg, #175e69, #28afc4); color: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 2px dashed rgba(255,255,255,0.5);">
+        <h3 style="margin-bottom: 5px; color: #ffbc3f;">🎉 Aktuális ajánlatunk neked!</h3>
+        <p style="margin: 5px 0; font-size: 0.95rem;">
+            Használd a <strong><?= htmlspecialchars($personal_coupon['code']) ?></strong> kódot 
+            <strong><?= $personal_coupon['discount'] ?>%</strong> kedvezményért!
+        </p>
+        <p style="font-size: 0.8rem; opacity: 0.9;">
+            *A kedvezmény termékenként maximum <?= $max_allowed_discounted ?> darabra érvényesíthető.
+        </p>
+        <button onclick="copyCode('<?= $personal_coupon['code'] ?>')" class="button" style="background: #ffbc3f; color: #111; margin-top: 10px; padding: 8px 20px; font-size: 0.85rem;">Kód másolása</button>
+    </div>
+<?php endif; ?>
+
+<div class="tab">
+    <button class="tablinks active" onclick="openTab(event,'details')">Adatok módosítása</button>
+    <?php if ($user['role'] == 0): ?>
+        <button class="tablinks" onclick="openTab(event,'orders')">Rendeléseim</button>
+    <?php endif; ?>
+    
+    <button class="tablinks" onclick="openTab(event,'notifications')">
+        Értesítések <?php if($unread_count > 0): ?><span style="background:red; color:white; border-radius:50%; padding: 2px 7px; font-size:12px;"><?= $unread_count ?></span><?php endif; ?>
+    </button>
+    
+    <?php if ($user['role'] == 0): ?>
+        <button class="tablinks" onclick="openTab(event,'my_coupons')">
+            Kuponjaim
+            <?php if(count($my_active_coupons) > 0): ?>
+                <span style="background:#ffbc3f; color:white; border-radius:50%; padding: 2px 7px; font-size:12px;">
+                    <?= count($my_active_coupons) ?>
+                </span>
+            <?php endif; ?>
+        </button>
+    <?php endif; ?>
+    
+    <button class="tablinks" onclick="openTab(event,'security')">Biztonság</button>
+</div>
+
+<div class="profile-card">
+    <?php if($success_msg): ?><div class="msg success"><?= $success_msg ?></div><?php endif; ?>
+    <?php if($error_msg): ?><div class="msg error"><?= $error_msg ?></div><?php endif; ?>
+
+    <div id="details" class="tabcontent" style="display:block;">
+        <form method="POST">
+            <label>Bejelentkezési név (Nem módosítható):</label>
+            <input type="text" value="<?= htmlspecialchars($user['name']) ?>" disabled style="background:#eee;">
+            <label>Profil név:</label>
+            <input type="text" name="profile_name" value="<?= htmlspecialchars($user['profile_name'] ?? '') ?>" required>
+            <label>E-mail cím:</label>
+            <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" required>
+            <label>Szállítási cím:</label>
+            <textarea name="location" style="height:80px;"><?= htmlspecialchars($user['location'] ?? '') ?></textarea>
+            <input type="submit" name="save" value="Mentés" class="button">
+        </form>
+    </div>
+
+    <?php if ($user['role'] == 0): ?>
+    <div id="orders" class="tabcontent">
+        <h3 style="text-align:center; color:#1976d2;">Korábbi rendeléseid</h3>
+        
+            <?php if($orders->num_rows > 0): ?>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <thead>
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="padding: 10px; border: 1px solid #ddd;">#ID</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Dátum</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Termékek</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Összeg</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Állapot</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Művelet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while($order = $orders->fetch_assoc()): ?>
+                            <tr style="border-bottom: 1px solid #ccc; text-align: center;">
+                                <td style="padding: 10px;">#<?= $order['id'] ?></td>
+                                <td style="padding: 10px;"><?= $order['date'] ?></td>
+                                <td style="padding: 10px; text-align: left; font-size: 0.9rem;">
+                                    <?= $order['items_details'] ?>
+                                </td>
+                                <td style="padding: 10px; white-space: nowrap;"><?= number_format($order['total_price'], 0, '', ' ') ?> Ft</td>
+                                <td style="padding: 10px;">
+                                    <span class="status-label" style="font-weight: bold; color: <?php 
+                                        echo ($order['status'] == 'Lemondva') ? 'red' : (($order['status'] == 'Kiszállítva') ? 'green' : '#1976d2'); 
+                                    ?>;">
+                                        <?= $order['status'] ?>
+                                    </span>
+                                </td>
+                                <td style="padding: 10px;">
+                                    <?php if($order['status'] == 'Megrendelve'): ?>
+                                        <form method="POST" onsubmit="return confirm('Biztosan lemondod ezt a rendelést?');" style="margin:0;">
+                                            <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                                            <button type="submit" name="cancel_order" style="background:#dc3545; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:4px;">
+                                                Lemondás
+                                            </button>
+                                        </form>
+                                    <?php else: ?>
+                                        <span style="color: #888;">-</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+            <?php else: ?>
+                <p style="text-align:center; margin-top: 20px;">Még nincs leadott rendelésed.</p>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+
+        <div id="notifications" class="tabcontent">
+            <h3 style="text-align:center; color:#1976d2;">Értesítéseid</h3>
+            <?php if(count($all_notifs) > 0): ?>
+                <div style="margin-top:20px; display: flex; flex-direction: column; gap: 10px;">
+                    <?php foreach($all_notifs as $n): 
+                        // Speciális stílus a TOP vásárlóknak
+                        $isTopBuyer = (
+                            strpos($n['message'], 'top vásárlónk') !== false ||
+                            strpos($n['message'], 'TOP') !== false
+                        );
+                        $style = $isTopBuyer 
+                            ? "background: linear-gradient(90deg, #fffbf0, #fff); border: 1px solid #ffbc3f; border-left: 5px solid #ffbc3f;" 
+                            : "background: #fff; border: 1px solid #eee; border-left: 4px solid #28afc4;";
+                    ?>
+                        <div class="notification-item" style="<?= $style ?> padding: 15px; border-radius: 8px;">
+                            <p style="margin:0; font-weight: <?= $isTopBuyer ? '600' : 'normal' ?>; color: #333;">
+                                <?= htmlspecialchars($n['message']) ?>
+                            </p>
+                            <small style="color: #888;"><?= date('Y.m.d. H:i', strtotime($n['created_at'])) ?></small>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <p style="text-align:center; margin-top: 20px;">Nincsenek értesítéseid.</p>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($user['role'] == 0): ?>
+        <div id="my_coupons" class="tabcontent">
+        <h3 style="text-align:center; color:#175e69;">Megszerzett kuponjaid</h3>
+        
+        <p style="text-align:center; font-size: 0.9rem; color: #666; margin-bottom: 20px;">
+            Másold ki a kódot, és váltsd be a <b><a href="kupon.php" style="color:#28afc4; text-decoration:none;"><i class="ri-coupon-2-line"></i> Kupon beváltása</a></b> oldalon!
+        </p>
+
+        <?php if(count($my_active_coupons) > 0): ?>
+            <div style="display: grid; gap: 15px;">
+                <?php foreach($my_active_coupons as $cp): ?>
+                    <div style="border: 2px dashed #28afc4; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: #f0faff; position: relative; overflow: hidden;">
+                        
+                        <div>
+                            <strong style="font-size: 1.3rem; color: #175e69; letter-spacing: 1px;"><?= htmlspecialchars($cp['code']) ?></strong><br>
+                            <small style="color: #666; font-size: 12px;">Érvényes eddig: <?= date('Y.m.d.', strtotime($cp['valid_until'])) ?></small>
+                        </div>
+
+                        <div style="text-align: right;">
+                            <span style="display: block; font-weight: 900; font-size: 1.4rem; color: #28afc4;"><?= $cp['discount'] ?>%</span>
+                            <button onclick="copyCode('<?= $cp['code'] ?>')" class="button" style="margin: 0; padding: 5px 12px; font-size: 11px; background-color: #ffbc3f; border-radius: 20px; color: #000;">KÓD MÁSOLÁSA</button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div style="text-align:center; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+                <p style="color: #28a745; font-weight: bold;">Jelenleg nincs beváltatlan kuponod.</p>
+                <p style="font-size: 0.85rem; color: #777;">Ha már beváltottad a kódod a Kupon oldalon, a visszaszámlálót az akciós oldalon találod!</p>
+            </div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <div id="security" class="tabcontent">
+        <section style="margin-bottom:40px;">
+            <h3 style="text-align:center; color:#1976d2;">Jelszó módosítása</h3>
+            <p style="text-align:center; color:#555;">Ha biztosan módosítani szeretné a fiókját, az <strong>"Új jelszó"</strong> szekció részben <br> minimum <strong>6 karakterből</strong> álló kódot adjon meg.</p>
+            <br>
+            <form method="POST" style="max-width:400px; margin:0 auto;">
+                <label>Jelenlegi jelszó:</label>
+                <input type="password" name="current_password" required>
+
+                <label>Új jelszó:</label>
+                <input type="password" name="new_password" id="new_password" required minlength="6">
+
+                <input type="submit" name="change_password" id="pass_btn" value="Jelszó módosítása" class="button">
+            </form>
+        </section>
+
+        <section style="border-top:1px solid #ccc; padding-top:30px;">
+            <h3 style="text-align:center; color:#d32f2f;">Fiók törlése</h3>
+            <p style="text-align:center; color:#555;">
+                Ha biztosan törölni szeretné a fiókját,<br> írja be a jelszavát kétszer a megerősítéshez.
+            </p>
+            <br>
+            <form method="POST" style="max-width:400px; margin:0 auto;">
+                <label>Jelszó:</label>
+                <input type="password" name="current_password" required>
+                
+                <label>Jelszó megerősítése:</label>
+                <input type="password" name="confirm_password" required>
+                
+                <input type="submit" name="delete_account" value="Fiók törlése" class="button" 
+                    style="background-color:#d32f2f; margin-top:10px;">
+            </form>
+        </section>
+    </div>
+</div>
