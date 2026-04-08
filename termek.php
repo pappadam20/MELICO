@@ -557,3 +557,34 @@ if ($name === "Comté AOP" && empty($description)) {
 
 // Beszállító külön változóba (opcionális)
 $supplier_text = !empty($supplier_name) ? "Szállító: " . htmlspecialchars($supplier_name) : "";
+
+
+
+
+
+/* ===============================
+   KOSÁR DARABSZÁM SZÁMÍTÁSA
+==================================*/
+/*
+  Ez a kód a kosárban lévő termékek összes darabszámát számolja ki.
+
+  - A kosár adatai a $_SESSION['cart'] tömbben vannak tárolva
+  - Minden elem tartalmaz egy 'quantity' (mennyiség) mezőt
+  - A ciklus összeadja az összes mennyiséget
+
+  Eredmény:
+  -> $total_items változóban kerül eltárolásra a teljes darabszám
+*/
+
+$total_items = 0;
+
+/* Ellenőrizzük, hogy a kosár nem üres */
+if (!empty($_SESSION['cart'])) {
+
+    /* Végigmegyünk minden kosár elemen */
+    foreach ($_SESSION['cart'] as $item) {
+
+        /* Hozzáadjuk az aktuális termék mennyiségét */
+        $total_items += $item['quantity'];
+    }
+}
