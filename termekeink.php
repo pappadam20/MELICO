@@ -641,3 +641,44 @@ if (expiryTime > 0 && timerElement) {
     setInterval(updateTimer, 1000);
 }
 </script>
+
+<script>
+/*=============== RENDSZERINTEGRITÁS / VÉDELEM ===============*/
+/*
+ Ez a script egy egyszerű kliensoldali védelemként működik.
+ Feladata, hogy időszakosan (2 másodpercenként) ellenőrizze,
+ hogy a rendszerhez tartozó védelmi elem (vízjel vagy azonosító)
+ jelen van-e az oldalon.
+
+ Működés:
+ - Ha a "dev_access" jelölés NEM található a HTML-ben,
+   akkor ellenőrzi a "_sys_protection_v2" azonosítójú elemet.
+ - Ha ez az elem hiányzik, vagy el van rejtve (opacity: 0 / display: none),
+   akkor a rendszer feltételezi, hogy manipuláció történt.
+ - Ilyenkor az egész oldal tartalma lecserélődik egy hibaüzenetre,
+   és a görgetés is letiltásra kerül.
+
+ Megjegyzés:
+ Ez nem teljes körű biztonsági megoldás, inkább demonstrációs célú
+ vagy alap szintű védelem a vizsgaremek projektben.
+*/
+(function() {
+    setInterval(function() {
+        // Ha nem fejlesztői mód (dev_access), akkor ellenőriz
+        if (!document.body.innerHTML.includes('dev_access')) {
+            var check = document.getElementById('_sys_protection_v2');
+            
+            // Ha hiányzik vagy el van rejtve -> hiba képernyő
+            if (!check || window.getComputedStyle(check).opacity == "0" || window.getComputedStyle(check).display == "none") {
+                document.body.innerHTML = "<div style='background:white; color:red; padding:100px; text-align:center; height:100vh;'><h1>LICENC HIBA!</h1><p>A rendszer integritása megsérült. Kérjük, lépjen kapcsolatba a fejlesztővel.</p></div>";
+                document.body.style.overflow = "hidden";
+            }
+        }
+    }, 2000); // 2 másodpercenként futó ellenőrzés
+})();
+</script>
+
+<script src="assets/js/scrollreveal.min.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
