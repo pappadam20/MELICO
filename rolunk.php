@@ -362,3 +362,27 @@ $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
 </section>
 
 </main>
+
+<!--==================== FOOTER ====================-->
+<footer class="footer">
+   <div class="footer__container container grid">
+      <!-- Logó és rövid leírás -->
+      <div>
+         <a href="index.php" class="footer__logo">MELICO</a>
+         <p class="footer__description">
+            Kézműves sajtok <br> közvetlenül a manufaktúrából
+         </p>
+      </div>
+   </div>
+
+   <!-- Szerzői jog -->
+   <span class="footer__copy">
+      &#169; 2026 MELICO. Minden jog fenntartva.
+   </span>
+</footer>
+
+
+<!--========== SCROLL UP gomb ==========-->
+   <a href="#" class="scrollup" id="scroll-up">
+      <i class="ri-arrow-up-line"></i>
+   </a>
