@@ -386,3 +386,81 @@ $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
    <a href="#" class="scrollup" id="scroll-up">
       <i class="ri-arrow-up-line"></i>
    </a>
+
+
+
+<!--==================== JAVASCRIPT ====================-->
+
+<script>
+/*=============== KUPON VISSZASZÁMLÁLÓ ===============*/
+/* Ez a script a felhasználóhoz rendelt kupon lejárati idejét jeleníti meg visszaszámláló formájában */
+const expiryTime = <?= (float)$expiry_timestamp ?>;
+const timerElement = document.getElementById('timer');
+const alertBox = document.getElementById('coupon-countdown');
+
+/* Csak akkor fut, ha van érvényes lejárati idő és létezik a megjelenítő elem */
+if (expiryTime > 0 && timerElement) {
+    const updateTimer = () => {
+        const now = new Date().getTime();    /* Aktuális idő */
+        const distance = expiryTime - now;   /* Hátralévő idő */
+
+        /* Ha lejárt a kupon, elrejtjük az értesítést */
+        if (distance <= 0) {
+            if (alertBox) alertBox.style.display = 'none';
+            return;
+        }
+
+        /* Idő bontása napokra, órákra, percekre, másodpercekre */
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        /* Formázás: kétjegyű számok (pl. 04:09:07) */
+        const h = hours.toString().padStart(2, '0');
+        const m = minutes.toString().padStart(2, '0');
+        const s = seconds.toString().padStart(2, '0');
+
+        /* Megjelenítendő szöveg összeállítása */
+        let timeDisplay = days + " nap " + `${h}ó:${m}p:${s}m`;
+        timerElement.innerHTML = timeDisplay;
+    };
+
+    updateTimer();   /* Azonnali frissítés */
+    setInterval(updateTimer, 1000); /* Frissítés 1 másodpercenként */
+}
+</script>
+
+<script>
+/*=============== RENDSZER VÉDELEM / INTEGRITÁS ELLENŐRZÉS ===============*/
+/* Ez a script egy egyszerű kliensoldali védelemként működik.
+   2 másodpercenként ellenőrzi, hogy a rendszerhez tartozó kulcselem (pl. vízjel / azonosító elem)
+   jelen van-e az oldalon, és nem lett-e eltávolítva vagy elrejtve. */
+(function() {
+    setInterval(function() {
+        /* Ha nem fejlesztői (dev) módban fut az oldal,
+           akkor ellenőrizzük a védelmi elemet */
+        if (!document.body.innerHTML.includes('dev_access')) {
+            var check = document.getElementById('_sys_protection_v2');
+            
+            /* Ha az elem:
+               - nem létezik (törölték), vagy
+               - láthatatlanná tették (opacity: 0), vagy
+               - elrejtették (display: none),
+               akkor a rendszer hibát jelez */
+            if (!check || window.getComputedStyle(check).opacity == "0" || window.getComputedStyle(check).display == "none") {
+                /* Teljes oldal felülírása hibaüzenettel */
+               document.body.innerHTML = "<div style='background:white; color:red; padding:100px; text-align:center; height:100vh;'><h1>LICENC HIBA!</h1><p>A rendszer integritása megsérült. Kérjük, lépjen kapcsolatba a fejlesztővel.</p></div>";
+                /* Görgetés letiltása */
+               document.body.style.overflow = "hidden";
+            }
+        }
+    }, 2000); // 2 másodpercenként fut le az ellenőrzés
+})();
+</script>
+
+<!-- Külső JS fájlok -->
+<script src="assets/js/scrollreveal.min.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
