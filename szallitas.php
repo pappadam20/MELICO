@@ -117,3 +117,170 @@ if (isset($_POST['complete_order'])) {
    - cél: vásárló címe */
 $nav_link = "https://www.google.com/maps/dir/?api=1&origin=" . urlencode($indulas_cime) . "&destination=" . urlencode($order['location']) . "&travelmode=driving";
 ?>
+
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <!-- Alap meta beállítások -->
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
+   <!-- Oldal ikon (favicon) -->
+   <link rel="shortcut icon" href="assets/img/logo/MELICO LOGO 2.png" type="image/x-icon">
+   
+   <!-- Ikonok (Remixicon) -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.7.0/remixicon.css">
+   
+   <!-- Külső CSS fájl -->
+   <link rel="stylesheet" href="assets/css/styles.css">
+   
+   <!-- Oldal címe -->
+   <title>Szállítás Folyamatban - MELICO</title>
+
+   <style>
+        /* Oldal háttér beállítása (fix futár nézet háttérkép) */
+       body {
+           background-image: url('assets/img/futar-bg.png');
+           background-size: cover;          /* teljes képernyő kitöltése */
+           background-position: center;     /* középre igazítás */
+           background-attachment: fixed;    /* háttér fix marad scrollnál */
+           background-repeat: no-repeat;
+           margin: 0;
+           font-family: 'Poppins', sans-serif;
+       }
+
+       /* Fő szekció (középre igazítás + térköz header alatt) */
+       .futar__section {
+           padding-top: 8rem;
+           padding-bottom: 4rem;
+           min-height: 80vh;
+           display: flex;
+           justify-content: center;
+       }
+
+       /* Kártya (rendelés részletek konténer) */
+       .futar__container {
+           background-color: #ffffff;
+           padding: 2.5rem;
+           border-radius: 12px;
+           box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+           max-width: 550px;
+           width: 95%;
+       }
+
+       /* Oldalcím stílus */
+       .futar__title {
+           color: #175e69;
+           text-align: center;
+           margin-bottom: 2rem;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           gap: 10px;
+       }
+
+       /* Státusz jelző (pl. "Szállítás alatt") */
+       .status-badge {
+           display: inline-block;
+           padding: 8px 18px;
+           border-radius: 20px;
+           font-size: 0.85rem;
+           font-weight: bold;
+           background-color: #28afc4;
+           color: white;
+           margin-bottom: 1rem;
+           text-transform: uppercase;
+       }
+
+       /* Információs doboz (rendelés adatok) */
+       .detail__info-box {
+           background-color: #f9f9f9;
+           padding: 1.5rem;
+           border-radius: 8px;
+           border-left: 5px solid #249db0;
+           margin-bottom: 1.5rem;
+       }
+
+       /* Információs sorok */
+       .detail__info-box p {
+           margin: 10px 0;
+           display: flex;
+           align-items: center;
+           gap: 12px;
+       }
+
+       /* Ikonok színezése */
+       .detail__info-box i { 
+        color: #249db0; 
+        font-size: 1.2rem; 
+        }
+
+        /* Általános gomb stílus */
+       .button {
+           border: none;
+           padding: 15px;
+           border-radius: 8px;
+           cursor: pointer;
+           font-weight: bold;
+           width: 100%;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           gap: 10px;
+           transition: 0.3s ease;
+           font-size: 1rem;
+           text-decoration: none;
+           margin-bottom: 12px;
+       }
+
+       /* Rendelés lezárása gomb */
+       .button--complete {
+           background-color: #0099cc;
+           color: white;
+       }
+       .button--complete:hover {
+           background-color: #00d0ff;
+           transform: translateY(-2px);
+       }
+
+       /* Navigáció megnyitása (Google Maps) */
+       .button--nav {
+           background-color: #f39c12;
+           color: white;
+       }
+       .button--nav:hover {
+           background-color: #ffcc00;
+           color: #000;
+           transform: translateY(-2px);
+       }
+
+       /* Vissza gomb */
+       .button--back {
+           background: none;
+           color: #666;
+           text-decoration: none;
+           display: inline-flex;
+           align-items: center;
+           gap: 8px;
+           margin-bottom: 1.5rem;
+           font-size: 0.95rem;
+           transition: all 0.3s ease;
+           width: auto;
+           padding: 0;
+       }
+       .button--back:hover {
+           color: #249db0;
+           transform: translateX(-5px);
+       }
+
+       /* Elválasztó vonal */
+       hr { 
+        border: none; 
+        border-top: 1px solid #eee; 
+        margin: 15px 0; 
+        }
+
+   </style>
+
+</head>
+<body>
