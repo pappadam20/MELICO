@@ -428,3 +428,64 @@ $show_discount = ($discount > 0 && $total_used_quota < $max_allowed_discounted &
 
 /* Végső kedvezményes ár számítása */
 $price_after_discount = $price * (1 - $discount / 100);
+
+
+
+/* ===============================
+   TERMÉK ALAPÉRTELMEZETT LEÍRÁS
+=================================*/
+
+//category_1
+
+// Ha a termék neve "Camembert de Normandie AOP" és nincs admin által megadott leírás
+if ($name === "Camembert de Normandie AOP" && empty($description)) {
+    $description = "Ez a híres francia Camembert sajt lágy, krémes állagú, karakteres ízzel rendelkezik. 
+Tökéletes kiegészítője egy sajttálhoz, vagy egyszerűen friss kenyérrel fogyasztva. 
+Frissességét és minőségét a tradicionális érlelési módszer biztosítja.";
+}
+
+// Chevre Frais alapértelmezett leírása
+if ($name === "Chevre Frais" && empty($description)) {
+    $description = "A Chevre Frais egy friss, lágy kecskesajt, amely krémes állagú és enyhén savanykás ízű. 
+                    Kiválóan alkalmas szendvicsekhez, salátákhoz vagy önmagában fogyasztva. 
+                    Minőségi alapanyagokból készül, garantálva a frissességet és a tradicionális ízt.";
+}
+
+// Gorgonzola Dolce DOP alapértelmezett leírása
+if ($name === "Gorgonzola Dolce DOP" && empty($description)) {
+    $description = "A Gorgonzola Dolce DOP egy lágy, krémes kékpenészes sajt enyhén édeskés ízzel. 
+                    Kiválóan alkalmas salátákhoz, tésztákhoz, vagy önmagában fogyasztva. 
+                    Olasz minőségi alapanyagokból készül, garantálva az autentikus ízt és a frissességet.";
+}
+
+// Ricotta alapértelmezett leírása
+if ($name === "Ricotta" && empty($description)) {
+    $description = "A Ricotta egy lágy, friss sajt, amely könnyű és krémes állagú. 
+                    Tökéletesen illik desszertekhez, töltelékekhez, valamint salátákhoz és szendvicsekhez is. 
+                    Kiváló minőségű tejből készül, garantálva a frissességet és az enyhén édeskés ízt.";
+}
+
+// Mozzarella di Bufala Campana DOP alapértelmezett leírása
+if ($name === "Mozzarella di Bufala Campana DOP" && empty($description)) {
+    $description = "A Mozzarella di Bufala Campana DOP egy prémium friss sajt, melyet hagyományos módszerekkel készítenek olasz bivalytej felhasználásával.  
+                    Lágy, krémes textúrájú és enyhén édeskés ízű. Ideális salátákhoz, pizzához vagy önmagában, friss kenyérrel fogyasztva.";
+}
+
+// Mascarpone alapértelmezett leírása
+if ($name === "Mascarpone" && empty($description)) {
+    $description = "A Mascarpone egy lágy, krémes olasz sajt, amely gazdag és enyhén édeskés ízű.  
+                    Különösen alkalmas desszertekhez, például tiramisuhoz, de friss kenyérrel vagy süteményekhez is kiváló.";
+}
+
+// Brie de Meaux AOP alapértelmezett leírása
+if ($name === "Brie de Meaux AOP" && empty($description)) {
+    $description = "A Brie de Meaux AOP egy klasszikus francia lágy sajt, krémes textúrával és jellegzetes, enyhén diós ízzel.  
+                    Kiválóan fogyasztható önmagában, kenyérrel, vagy sajttál részeként. Az AOP minősítés garantálja a hagyományos előállítást és a magas minőséget.";
+}
+
+// Burrata alapértelmezett leírása
+if ($name === "Burrata" && empty($description)) {
+    $description = "A Burrata egy különleges olasz friss sajt, krémes belsővel és lágy külső réteggel.  
+                    Tökéletes választás salátákhoz, tálakhoz vagy egyszerűen friss kenyérrel.  
+                    Kiemelkedő minőségét gondos kézműves előállítás biztosítja.";
+}
