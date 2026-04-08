@@ -368,3 +368,68 @@ function renderCategory($conn, $cat_id, $cat_title, $cat_subtitle) {
     echo '</section>';
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+   <meta charset="UTF-8">                                                   <!-- Karakterkódolás beállítása (UTF-8, magyar ékezetek támogatása) -->
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">   <!-- Reszponzív megjelenítés mobil eszközökhöz -->
+
+   <!-- Weboldal ikon (favicon) -->
+   <link rel="shortcut icon" href="assets/img/logo/MELICO LOGO 2.png" type="image/x-icon">
+   
+    <!-- Ikonok (Remixicon könyvtár betöltése) -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.7.0/remixicon.css">
+   
+    <!-- Fő stíluslap -->
+   <link rel="stylesheet" href="assets/css/styles.css">
+
+   <!-- Oldal címe a böngésző fülön -->
+   <title>MELICO – Termékeink</title>
+
+   <style>
+    /*=============== KUPON ÉRTESÍTŐ SÁV ===============*/
+    /* Felső figyelmeztető sáv, amely aktív kupon esetén jelenik meg */
+       .coupon-alert {
+           background: linear-gradient(90deg, #ffbc3f, #ff9f00);    /* Narancs átmenetes háttér */
+           color: #1a150e;                    /* Sötét szöveg a kontraszt miatt */
+           padding: 1rem;                       /* Belső térköz */
+           text-align: center;                  /* Szöveg középre igazítása */
+           font-weight: bold;                   /* Félkövér szöveg */
+           border-bottom: 2px solid #e68a00;    /* Alsó szegély kiemeléshez */
+           display: none;                       /* Alapból rejtett, JS jeleníti meg ha van aktív kupon */
+       }
+
+       /*=============== VISSZASZÁMLÁLÓ IDŐZÍTŐ ===============*/
+       #timer {
+         color: #000000;    /* Fekete szöveg */
+         font-weight: bold;     /* Félkövér kiemelés */
+         margin-left: 5px;      /* Kis térköz bal oldalon */
+      }
+
+      /*=============== KUPON SZÖVEG RÉSZEK ===============*/
+      .coupon-main {
+         margin-right: 10px;    /* Jobb oldali térköz */
+      }
+
+      .coupon-divider {
+         margin: 0 10px;    /* Két oldalra térköz */
+         opacity: 0.6;      /* Halvány elválasztó */
+      }
+
+      /*=============== KUPON LEJÁRATI IDŐ KIEMELÉS ===============*/
+      .coupon-expiry {
+         background: rgb(255, 0, 81);   /* Piros háttér (figyelemfelkeltés) */
+         padding: 3px 8px;                  /* Belső térköz */
+         border-radius: 6px;                /* Lekerekített sarkok */
+      }
+
+      /*=============== VISSZASZÁMLÁLÓ IDŐZÍTŐ ===============*/
+      #timer {
+         font-family: monospace;    /* Fix szélességű betűtípus (digitális hatás) */
+         font-size: 1.2rem;         /* Nagyobb méret a jobb láthatóságért */
+         margin-left: 5px;          /* Kis térköz bal oldalon */
+      }
+    </style>
+</head>
+<body>
