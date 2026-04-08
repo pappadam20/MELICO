@@ -556,3 +556,33 @@ function renderCategory($conn, $cat_id, $cat_title, $cat_subtitle) {
          <img src="assets/img/cheese3.png" alt="Kézműves sajtok" class="about-img">
       </div>
    </section>
+
+   <!--=============== KATEGÓRIA NAVIGÁCIÓ ===============-->
+   <div class="page-nav">
+        <?php
+        // Kategóriák bejárása navigációhoz
+        $categories->data_seek(0);
+        while($cat = $categories->fetch_assoc()):
+        ?>
+        <!-- Kattintható linkek az adott kategória szekcióhoz -->
+        <a href="#category<?php echo $cat['id']; ?>" class="nav__link">
+            <?php echo htmlspecialchars($cat['name']); ?>
+        </a>
+        <?php endwhile; ?>
+    </div>
+
+    <!--=============== TERMÉKEK LISTÁZÁSA KATEGÓRIÁNKÉNT ===============-->
+    <?php
+    // Kategóriák újra bejárása a termékek kirendereléséhez
+    $categories->data_seek(0);
+    while($cat = $categories->fetch_assoc()){
+        renderCategory(
+            $conn,          // adatbázis kapcsolat
+            $cat['id'],     // kategória azonosító
+            $cat['name'],   // kategória neve
+            $cat['name']    // (feliratként is használva)
+        );
+    }
+    ?>
+
+</main>
