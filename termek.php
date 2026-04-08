@@ -343,3 +343,11 @@ if ($stmt = $conn->prepare("
 
     // Statement lezárása (erőforrás felszabadítás)
     $stmt->close();
+
+} else {
+    /*
+      Ha a prepare() sikertelen:
+      - adatbázis hiba vagy rossz SQL
+    */
+    die("Adatbázis hiba.");
+}
