@@ -221,3 +221,150 @@ if (!empty($_SESSION['cart'])) {
         $total_items += $item['quantity'];  // Minden termék mennyiségének hozzáadása az összeghez
     }
 }
+
+
+
+// --- 3. RENDERELÉS ÉS FUNKCIÓK ---
+
+/*
+ Ez a függvény egy adott kategória termékeit jeleníti meg dinamikusan.
+ Feladata:
+ - Lekéri az adott kategóriához tartozó termékeket az adatbázisból
+ - Figyelembe veszi a felhasználó kuponkedvezményét és annak korlátait
+ - Ellenőrzi, hogy a felhasználó mennyi kedvezményes terméket vásárolt már
+ - Megjeleníti az árakat (eredeti és kedvezményes)
+ - Kezeli a készlet állapot vizuális jelzését
+ - Lehetővé teszi a kosárba helyezést (csak vásárló szerepkör esetén)
+*/
+function renderCategory($conn, $cat_id, $cat_title, $cat_subtitle) {
+
+    // Session adatok lekérése (aktuális felhasználó és kuponkedvezmény)
+    $discount = $_SESSION['coupon_discount'] ?? 0;
+    $user_id = $_SESSION['user_id'] ?? 0;
+
+    // Beállítások lekérése: maximum hány termékre használható a kupon
+    $set_res = $conn->query("SELECT max_discounted_items FROM SETTINGS LIMIT 1");
+    $settings = $set_res->fetch_assoc();
+    $max_limit = $settings['max_discounted_items'] ?? 1;
+
+    // Termékek lekérdezése az adott kategóriából
+    $stmt = $conn->prepare("SELECT id, name, price, image, category_id, stock FROM PRODUCTS WHERE category_id = ?");
+    $stmt->bind_param("i", $cat_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    // Kategória szekció megnyitása
+    echo '<section class="favorite section" id="category' . $cat_id . '">';
+    echo '   <h2 class="section__title">' . htmlspecialchars($cat_title) . '</h2>';
+    echo '   <div class="favorite__container container grid">';
+
+    // Termékek bejárása
+    while ($row = $result->fetch_assoc()) {
+        $p_id = $row['id'];
+        
+        // Korábbi kedvezményes vásárlások összesítése (adatbázisból)
+        $already_bought_discounted = 0;
+        if ($user_id > 0 && $discount > 0) {
+            $check_stmt = $conn->prepare("
+                SELECT SUM(oi.quantity) as total 
+                FROM ORDER_ITEMS oi
+                JOIN ORDERS o ON oi.order_id = o.id
+                WHERE o.user_id = ? AND oi.product_id = ? AND oi.sale_price < ?
+            ");
+            $check_stmt->bind_param("iid", $user_id, $p_id, $row['price']);
+            $check_stmt->execute();
+            $res_bought = $check_stmt->get_result()->fetch_assoc();
+            $already_bought_discounted = $res_bought['total'] ?? 0;
+            $check_stmt->close();
+        }
+
+        // Kosárban lévő kedvezményes mennyiség lekérése (sessionből)
+        $discount_key = $p_id . "_discounted";
+        $already_in_cart_discounted = $_SESSION['cart'][$discount_key]['quantity'] ?? 0;
+        
+        // Összes eddig felhasznált kedvezmény
+        $total_used_quota = $already_bought_discounted + $already_in_cart_discounted;
+        
+        // Eldöntjük, hogy megjeleníthető-e még a kedvezmény
+        $show_discount = ($discount > 0 && $total_used_quota < $max_limit);
+        
+        // Készlet állapot alapján CSS osztály hozzárendelése
+        if ($row['stock'] > 15) { $stockClass = "stock-high"; } 
+        elseif ($row['stock'] > 0) { $stockClass = "stock-medium"; } 
+        else { $stockClass = "stock-zero"; }
+
+        // Kép elérési út összeállítása (fallback ha nincs kép)
+        $imgPath = "assets/img/category_{$row['category_id']}/" . $row['image'];
+        if (!file_exists($imgPath) || empty($row['image'])) { $imgPath = "assets/img/no-image.png"; }
+
+        // Ár számítás (eredeti és kedvezményes)
+        $original_price = $row['price'];
+        $price_after_discount = $original_price * (1 - $discount / 100);
+        ?>
+
+
+        <!-- Egy termék kártya -->
+        <article class="favorite__card <?= $stockClass ?>">
+
+            <!-- Termék link és kép -->
+            <a href="termek.php?id=<?= $p_id ?>&from=termekeink.php">
+               <img src="<?= $imgPath ?>" class="favorite__img" alt="<?= htmlspecialchars($row['name']) ?>">
+            </a>
+            
+            <!-- Termék adatok -->
+            <div class="favorite__data">
+                <h2 class="favorite__title"><?= htmlspecialchars($row['name']) ?></h2>
+                <span class="favorite__subtitle"><?= htmlspecialchars($cat_subtitle) ?></span>
+                
+                <!-- Ár megjelenítés -->
+                <h3 class="favorite__price">
+                    <?php if ($show_discount): ?>
+
+                        <!-- Eredeti ár áthúzva -->
+                        <span style="text-decoration: line-through; color: #aaa; font-size: 0.8rem;">
+                            <?= number_format($original_price, 0, '', ' ') ?> Ft
+                        </span>
+
+                        <!-- Kedvezményes ár -->
+                        <span style="color: #ffbc3f;"> 
+                            <?= number_format($price_after_discount, 0, '', ' ') ?> Ft/kg
+                        </span>
+                        <br>
+
+                        <!-- Maradék kupon -->
+                        <small style="font-size: 1.2rem; font-weight: bold; color: #f7ff8c;">
+                            Maradt: <?= $max_limit - $total_used_quota ?> db
+                        </small>
+
+
+                    <?php else: ?>
+
+                        <!-- Normál ár -->
+                        <?= number_format($original_price, 0, '', ' ') ?> Ft/kg
+
+                        <!-- Ha elfogyott a kupon -->
+                        <?php if($discount > 0 && $total_used_quota >= $max_limit): ?>
+                            <br><small style="font-size: 1.2rem; font-weight: bold; color: red;">Nincs több kuponod!</small>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </h3>
+            </div>
+
+            <!-- Kosárba gomb (csak vásárlóknak) -->
+            <?php if(isset($_SESSION['role']) && $_SESSION['role'] == '0'): ?>
+               <form method="POST">
+                  <input type="hidden" name="id" value="<?= $p_id ?>">
+                  <button type="submit" name="add_to_cart" class="favorite__button button">
+                     <i class="ri-add-line"></i>
+                  </button>
+               </form>
+            <?php endif; ?>
+        </article>
+        <?php
+    }
+
+    // Szekció lezárása
+    echo '   </div>';
+    echo '</section>';
+}
+?>
