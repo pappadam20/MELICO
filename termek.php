@@ -69,3 +69,19 @@ $settings = $settings_res->fetch_assoc();
 
 // Ha nincs beállítva érték, alapértelmezett 1-et használunk
 $max_allowed_discounted = $settings['max_discounted_items'] ?? 1;
+
+
+
+// ===============================
+// FELHASZNÁLÓ SZEREPKÖR ELLENŐRZÉSE
+// ===============================
+/*
+  Ellenőrizzük, hogy a bejelentkezett felhasználó admin jogosultsággal rendelkezik-e.
+
+  Feltételezés:
+  - session['role'] = 2 -> admin
+  - minden más érték -> nem admin
+*/
+
+// Admin jogosultság vizsgálata
+$isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
