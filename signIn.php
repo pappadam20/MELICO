@@ -139,3 +139,29 @@ if (isset($_POST['login'])) {
 
 </head>
 <body>
+
+    <div class="container" id="container">
+
+        <!-- ========== REGISZTRÁCIÓS ŰRLAP ========== -->
+        <div class="form-container sign-up">
+        <form method="POST">
+
+            <h1>Regisztráció</h1>
+
+            <!-- Felhasználó neve -->
+            <input type="text" name="name" placeholder="Név" required>
+
+            <!-- Email cím -->
+            <input type="email" name="email" placeholder="Email" required>
+
+            <!-- Jelszó -->
+            <input type="password" name="password" placeholder="Jelszó" required>
+
+            <!-- Regisztráció gomb -->
+            <button type="submit" name="register">Regisztráció</button>
+
+            <!-- Visszalépés a főoldalra -->
+            <a href="index.php" class="back-btn">Vissza a főoldalra</a>
+
+        </form>
+    </div>
