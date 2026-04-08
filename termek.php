@@ -588,3 +588,29 @@ if (!empty($_SESSION['cart'])) {
         $total_items += $item['quantity'];
     }
 }
+
+
+
+/* ===============================
+   KÉP ÚTVONAL KEZELÉSE
+=================================*/
+/*
+  Ez a rész a termékekhez tartozó képek elérési útját állítja be.
+
+  Működés:
+  - A kategória ID alapján dinamikusan kiválasztja a megfelelő mappát
+  - Összeállítja a teljes képfájlt (útvonal + fájlnév)
+  - Ellenőrzi, hogy a kép létezik-e a szerveren
+  - Ha nem létezik, egy alapértelmezett (fallback) képet használ
+
+  Cél:
+  -> Ne törjön el az oldal, ha egy termékkép hiányzik
+  -> Mindig legyen megjeleníthető kép a UI-ban
+*/
+
+$imagePath = "assets/img/category_{$category_id}/" . $image;
+
+if (!file_exists($imagePath)) {
+    $imagePath = "assets/img/barna.jpg";    // alapértelmezett kép hiányzó esetekre
+}
+?>
