@@ -507,3 +507,52 @@ function renderCategory($conn, $cat_id, $cat_title, $cat_subtitle) {
       <div class="nav__toggle" id="nav-toggle"><i class="ri-menu-fill"></i></div>
    </nav>
 </header>
+
+<!--=============== FŐ TARTALMI RÉSZ (MAIN) ===============-->
+<main class="main">
+
+<?php if ($discount > 0): ?>
+    <!-- Kupon értesítés sáv: csak akkor jelenik meg, ha van aktív kedvezmény -->
+      <div id="coupon-countdown" class="coupon-alert" style="display: block;">
+         <i class="ri-time-line"></i> 
+
+         <!-- Kupon fő szöveg -->
+         <span class="coupon-main">
+            FIGYELEM! Van egy <strong><?= $discount ?>%-os</strong> kuponod! Lejár:
+         </span>
+
+         <!-- Visszaszámláló megjelenítése -->
+         <span class="coupon-expiry">
+            <span id="timer">--:--:--</span>
+         </span>
+      </div>
+      <?php endif; ?>
+
+    <?php if(isset($_GET['error']) && $_GET['error'] == 'no_permission'): ?>
+        <!-- Hibaüzenet: ha nem vásárló próbál kosárba tenni -->
+        <p style="color:red; text-align:center; font-weight:bold; margin: 20px 0;">
+            Csak vásárlók tehetnek terméket a kosárba!
+        </p>
+    <?php endif; ?>
+
+    <!-- Háttérkép a termékek oldalhoz -->
+   <img src="assets/img/Termékek-bg.png" alt="image" class="home__bg">
+
+   <!--=============== TERMÉKEK BEMUTATÓ SZEKCIÓ ===============-->
+   <section class="about section" id="termekeink">
+      <div class="about__container container grid">
+
+        <!-- Szöveges bemutatás -->
+         <div class="about__data">
+            <h2 class="section__title">Termékeink</h2>
+            <p class="about__description">
+               Kínálatunk gondosan válogatott, prémium minőségű kézműves sajtokból áll, 
+               amelyek hazai és nemzetközi, megbízható beszállítóktól érkeznek. 
+               A minőséget, frissességet és az egyedi ízvilágot minden termékünknél kiemelten kezeljük.
+            </p>
+         </div>
+
+         <!-- Illusztrációs kép -->
+         <img src="assets/img/cheese3.png" alt="Kézműves sajtok" class="about-img">
+      </div>
+   </section>
