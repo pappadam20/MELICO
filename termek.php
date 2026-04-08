@@ -173,3 +173,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
         header("Location: termek.php?id=" . (int)$_POST['id'] . "&error=no_permission");
         exit;
     }
+
+    /*==============================
+      TERMÉK BEOLVASÁSA
+    ==============================*/
+    $p_id = (int)$_POST['id'];
+
+    $stmt = $conn->prepare("SELECT name, price, stock FROM PRODUCTS WHERE id = ?");
+    $stmt->bind_param("i", $p_id);
+    $stmt->execute();
+    $res = $stmt->get_result();
+
+    if ($product = $res->fetch_assoc()) {
