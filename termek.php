@@ -290,3 +290,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
         }
     }
 }
+
+
+
+/* ===============================
+   TERMÉK ADATAINAK BETÖLTÉSE
+=================================*/
+/*
+  Ez a blokk egyetlen termék adatainak lekérdezésére szolgál
+  az adatbázisból a termék ID alapján.
+
+  Használat:
+  - Prepared statement (SQL injekció ellen védett)
+  - Több táblából származó adatok JOIN-nal
+*/
+if ($stmt = $conn->prepare("
+    SELECT p.id, p.name, p.price, p.stock, p.category_id, p.image, c.name, p.description, s.name
+    FROM PRODUCTS p
+    JOIN CATEGORIES c ON p.category_id = c.id
+    LEFT JOIN SUPPLIERS s ON p.supplier_id = s.id
+    WHERE p.id = ?
+")) {
+
+    /*
+      Paraméter kötése:
+      - "i" = integer (termék ID)
+      - $product_id = a lekérdezett termék azonosítója
+    */
+    $stmt->bind_param("i", $product_id);
