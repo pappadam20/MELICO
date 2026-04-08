@@ -279,3 +279,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
             ==============================*/
             header("Location: termek.php?id=$p_id&added=1");
             exit;
+
+        } else {
+
+            /*==============================
+              NINCS ELÉG KÉSZLET
+            ==============================*/
+            header("Location: termek.php?id=$p_id&error=1");
+            exit;
+        }
+    }
+}
