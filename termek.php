@@ -425,3 +425,6 @@ $total_used_quota = $already_bought_discounted + $already_in_cart_discounted;
   - nem admin felhasználó
 */
 $show_discount = ($discount > 0 && $total_used_quota < $max_allowed_discounted && !$isAdmin);
+
+/* Végső kedvezményes ár számítása */
+$price_after_discount = $price * (1 - $discount / 100);
