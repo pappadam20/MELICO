@@ -521,3 +521,39 @@ if ($name === "Maasdam" && empty($description)) {
                     Ideális szendvicsekhez, sajttálakhoz, valamint olvasztva ételekhez.  
                     A holland tradíció és a minőségi tej biztosítja a sajt jellegzetes karakterét.";
 }
+
+//--------------------------------------------------------------------------
+
+//category_3
+
+// Parmigiano Reggiano DOP alapértelmezett leírása
+if ($name === "Parmigiano Reggiano DOP" && empty($description)) {
+    $description = "Az igazi olasz Parmigiano Reggiano DOP sajt karakteres, gazdag ízvilágú, 
+                    kemény textúrájú sajt, melyet tradicionális érlelési módszerrel készítenek. 
+                    Ideális reszelve tésztákra, salátákra, vagy önmagában fogyasztva.";
+}
+
+// Grana Padano DOP alapértelmezett leírása
+if ($name === "Grana Padano DOP" && empty($description)) {
+    $description = "A Grana Padano DOP egy tradicionális olasz kemény sajt, gazdag, enyhén diós ízzel. 
+                    Érlelési ideje minimum 9 hónap, így tökéletes reszelve tésztákhoz, salátákhoz, vagy önállóan fogyasztva.";
+}
+
+// Pecorino Romano DOP alapértelmezett leírása
+if ($name === "Pecorino Romano DOP" && empty($description)) {
+    $description = "A Pecorino Romano DOP egy karakteres, juhtejből készült olasz kemény sajt.
+                    Intenzíven sós és fűszeres ízvilága miatt kiváló tésztákhoz, reszelve
+                    vagy szeletelve is remek választás.";
+}
+
+// Comté AOP alapértelmezett leírása
+if ($name === "Comté AOP" && empty($description)) {
+    $description = "A Comté AOP egy tradicionális francia félkemény sajt, amelyet a Jura-hegység
+                    régiójában készítenek. Íze gazdag és komplex, enyhén diós és gyümölcsös
+                    jegyekkel. Kiválóan olvad, ezért főzéshez és sajttálakhoz is ideális választás.";
+}
+
+
+
+// Beszállító külön változóba (opcionális)
+$supplier_text = !empty($supplier_name) ? "Szállító: " . htmlspecialchars($supplier_name) : "";
