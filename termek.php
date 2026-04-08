@@ -324,3 +324,10 @@ if ($stmt = $conn->prepare("
 
     // Eredmény memóriába töltése
     $stmt->store_result();
+
+    /*
+      Ellenőrzés:
+      - pontosan 1 találatnak kell lennie
+      - ha nincs találat -> hibát dobunk
+    */
+    if ($stmt->num_rows !== 1) die("A termék nem található.");
