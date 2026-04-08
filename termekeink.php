@@ -211,3 +211,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
         }
     }
 }
+
+// Kosár összesített darabszámának kiszámolása a fejlécben megjelenítéshez
+// Végigiterál a session-ben tárolt kosár elemein, és összeadja a darabszámokat
+$total_items = 0;
+
+if (!empty($_SESSION['cart'])) {
+    foreach ($_SESSION['cart'] as $item) {
+        $total_items += $item['quantity'];  // Minden termék mennyiségének hozzáadása az összeghez
+    }
+}
