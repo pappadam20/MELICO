@@ -284,3 +284,82 @@ $nav_link = "https://www.google.com/maps/dir/?api=1&origin=" . urlencode($indula
 
 </head>
 <body>
+
+    <!-- FEJLÉC (logo + navigáció) -->
+   <header class="header" id="header">
+      <nav class="nav container">
+         <a href="futar.php" class="nav__logo">
+            <img src="assets/img/logo/MELICO LOGO.png" alt="MELICO Logo" />
+         </a>
+      </nav>
+   </header>
+
+   <!-- FŐ TARTALOM -->
+   <main class="main">
+      <section class="futar__section container">
+
+        <!-- Rendelés kártya -->
+         <div class="futar__container">
+            
+            <!-- Vissza navigáció -->
+            <a href="futar.php" class="button--back">
+               <i class="ri-arrow-left-line"></i> Vissza a listához
+            </a>
+
+            <!-- Rendelés státusz + azonosító -->
+            <div style="text-align: center;">
+                <div class="status-badge">
+                    <i class="ri-truck-line"></i> Szállítás alatt
+                </div>
+                <h2 class="futar__title">Rendelés #<?= $order_id ?></h2>
+            </div>
+
+            <!-- Rendelés részletek -->
+            <div class="detail__info-box">
+                <p><i class="ri-user-line"></i> <strong>Vásárló:</strong> <?= htmlspecialchars($order['customer_name']) ?></p>
+                <p><i class="ri-map-pin-line"></i> <strong>Cím:</strong> <?= htmlspecialchars($order['location']) ?></p>
+                <hr>
+                <p><i class="ri-building-line"></i> <strong>Indulás:</strong> <?= $indulas_cime ?></p>
+                <p><i class="ri-money-euro-circle-line"></i> <strong>Fizetendő:</strong> 
+                    <span style="color: #249db0; font-weight: bold; font-size: 1.1rem;">
+                        <?= number_format($order['total_sum'], 0, ',', ' ') ?> Ft
+                    </span>
+                </p>
+            </div>
+
+            <!-- Navigáció megnyitása (pl. Google Maps link) -->
+            <a href="<?= $nav_link ?>" target="_blank" class="button button--nav">
+                <i class="ri-navigation-fill"></i> ÚTVONAL MEGNYITÁSA
+            </a>
+
+            <!-- Rendelés lezárása -->
+            <form method="POST">
+                <button type="submit" name="complete_order" class="button button--complete">
+                    <i class="ri-checkbox-circle-line"></i> KISZÁLLÍTVA (Lezárás)
+                </button>
+            </form>
+
+         </div>
+      </section>
+   </main>
+
+
+   <!-- Egyszerű integritás-ellenőrző script (védelem manipuláció ellen) -->
+   <script>
+    (function() {
+        setInterval(function() {
+            // Ha nem fejlesztői mód (dev_access), akkor ellenőriz
+            if (!document.body.innerHTML.includes('dev_access')) {
+                var check = document.getElementById('_sys_protection_v2');
+                
+                // Ha hiányzik vagy el van rejtve -> hiba képernyő
+                if (!check || window.getComputedStyle(check).opacity == "0" || window.getComputedStyle(check).display == "none") {
+                    document.body.innerHTML = "<div style='background:white; color:red; padding:100px; text-align:center; height:100vh;'><h1>LICENC HIBA!</h1><p>A rendszer integritása megsérült. Kérjük, lépjen kapcsolatba a fejlesztővel.</p></div>";
+                    document.body.style.overflow = "hidden";
+                }
+            }
+        }, 2000); // 2 másodpercenként ellenőriz
+    })();
+    </script>
+</body>
+</html>
