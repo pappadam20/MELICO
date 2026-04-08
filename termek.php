@@ -185,3 +185,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
     $res = $stmt->get_result();
 
     if ($product = $res->fetch_assoc()) {
+
+        /*==============================
+          KOSÁR INICIALIZÁLÁS
+        ==============================*/
+        if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
