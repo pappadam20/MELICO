@@ -927,3 +927,34 @@ if (!file_exists($imagePath)) {
                 <?php elseif (!$isAdmin): ?>
                     <p style="color:red;">Vásárláshoz jelentkezzen be!</p>
                 <?php endif; ?>
+
+
+
+                <!--=============== FELHASZNÁLÓI ÜZENETEK ===============-->
+                
+                <!-- Sikeres kosárba helyezés -->
+                <?php if (isset($_GET['added'])): ?>
+                    <p style="color:#F4A261;margin-top:10px;">
+                        A termék hozzáadva a kosárhoz!
+                    </p>
+                <?php endif; ?>
+
+                <!-- Készlethiány hiba -->
+                <?php if (isset($_GET['error']) && $_GET['error'] == '1'): ?>
+                    <p style="color:red;margin-top:10px;">
+                        Nincs több készleten!
+                    </p>
+                <?php endif; ?>
+
+                <!-- Jogosultsági hiba -->
+                <?php if (isset($_GET['error']) && $_GET['error'] == 'no_permission'): ?>
+                    <p style="color:red;margin-top:10px;">
+                        Csak vásárlók tehetnek terméket a kosárba!
+                    </p>
+                <?php endif; ?>
+
+            </div>
+
+        </div>
+    </section>
+</main>
