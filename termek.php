@@ -85,3 +85,28 @@ $max_allowed_discounted = $settings['max_discounted_items'] ?? 1;
 
 // Admin jogosultság vizsgálata
 $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
+
+
+
+/* ===============================
+   TERMÉK ID ELLENŐRZÉS
+=================================*/
+/*
+  Ez a rész biztosítja, hogy a felhasználó által átadott
+  termék azonosító (ID) érvényes legyen.
+
+  Ellenőrzések:
+  1. Létezik-e az 'id' paraméter a URL-ben (GET kérésben)
+  2. Szám-e az értéke (biztonsági ellenőrzés)
+*/
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    die("Érvénytelen termék azonosító.");
+}
+
+/*
+  Az ID típuskonvertálása egész számmá (int)
+  Cél:
+  - SQL injection elleni védelem egy alap szinten
+  - biztos adattípus használata az adatbázis lekérdezéshez
+*/
+$product_id = (int)$_GET['id'];
