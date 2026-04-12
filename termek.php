@@ -219,9 +219,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
             if ($discount > 0) {
 
                 $discount_key = $p_id . "_discounted";
-                $discounted_qty = $_SESSION['cart'][$discount_key]['quantity'] ?? 0;
-
-                if ($discounted_qty < $max_allowed_discounted) {
+                // Kosárban lévő akciós darabok
+               $discounted_in_cart = $_SESSION['cart'][$discount_key]['quantity'] ?? 0;
+               
+               // Korábban megvett akciós darabok
+               $already_bought_discounted = 0;
+               
+               $check_stmt = $conn->prepare("
+                   SELECT SUM(oi.quantity) as total 
+                   FROM ORDER_ITEMS oi
+                   JOIN ORDERS o ON oi.order_id = o.id
+                   WHERE o.user_id = ? 
+                   AND oi.product_id = ? 
+                   AND oi.sale_price < ?
+               ");
+               $check_stmt->bind_param("iid", $_SESSION['user_id'], $p_id, $product['price']);
+               $check_stmt->execute();
+               $res_bought = $check_stmt->get_result()->fetch_assoc();
+               $already_bought_discounted = $res_bought['total'] ?? 0;
+               $check_stmt->close();
+               
+               // TELJES kvóta
+               $total_used_quota = $discounted_in_cart + $already_bought_discounted;
+               
+               // HELYES feltétel
+               if ($total_used_quota < $max_allowed_discounted) {
 
                     // Kedvezményes ár számítása
                     $price_after_discount = $product['price'] * (1 - ($discount / 100));
