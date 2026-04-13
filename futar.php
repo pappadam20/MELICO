@@ -358,12 +358,6 @@ $orders_res = $conn->query($sql);
    </style>
 </head>
 <body>
-    /*=============== FEJLÉC ===============*/
-    /*
-    A felső navigációs sáv (header):
-    - logó megjelenítése
-    - profil ikon elérés
-    */
    <header class="header" id="header">
       <nav class="nav container">
 
