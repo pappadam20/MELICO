@@ -108,28 +108,23 @@ $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
 // Akkor fut le, ha a felhasználó terméket ad a kosárhoz
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
 
-    // Csak bejelentkezett vásárló (role = 0) tehet terméket a kosárba
+    // Csak bejelentkezett 'vásárló' (role=0) tehet a kosárba
     if (!isset($_SESSION['user_id']) || $_SESSION['role'] != '0') {
         header("Location: termekeink.php?error=no_permission");
         exit;
     }
 
-    // Termék ID biztonságos egész számmá alakítása
     $p_id = (int)$_POST['id'];
     
-    // Termék lekérdezése az adatbázisból (név, ár, készlet)
     $stmt = $conn->prepare("SELECT name, price, stock FROM PRODUCTS WHERE id = ?");
     $stmt->bind_param("i", $p_id);
     $stmt->execute();
     $res = $stmt->get_result();
     
-    // Ha a termék létezik
     if ($product = $res->fetch_assoc()) {
-        // Ha még nincs kosár session, inicializáljuk
         if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
         
-        //=============== KÉSZLET ELLENŐRZÉS ===============//
-        // Megszámoljuk, hogy az adott termékből mennyi van már a kosárban
+        // Ellenőrizzük a kosárban lévő összmennyiséget a készlethez
         $total_in_cart = 0;
         foreach($_SESSION['cart'] as $item) {
             if ($item['product_id'] == $p_id) {
@@ -137,26 +132,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
             }
         }
 
-        // Csak akkor engedjük hozzáadni, ha van még készlet
         if ($product['stock'] > $total_in_cart) {
             
-
-            //=============== KUPON LOGIKA ===============//
-            // Ha van aktív kedvezmény (pl. kupon)
+            // --- KUPON LOGIKA: DINAMIKUS DARAB KEDVEZMÉNYES (4 helyett a beállítás) ---
             if ($discount > 0) {
-
-                // Egyedi kulcs az akciós termékhez (külön tároljuk a kosárban)
                 $discount_key = $p_id . "_discounted";
-
-                // Jelenlegi akciós darabszám lekérdezése
                 $discount_key = $p_id . "_discounted";
 
                 // Kosárban lévő akciós darabok
                 $discounted_in_cart = $_SESSION['cart'][$discount_key]['quantity'] ?? 0;
-                
+
                 // Korábban megvett akciós darabok
                 $already_bought_discounted = 0;
-                
+
                 $check_stmt = $conn->prepare("
                     SELECT SUM(oi.quantity) as total 
                     FROM ORDER_ITEMS oi
@@ -170,16 +158,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
                 $res_bought = $check_stmt->get_result()->fetch_assoc();
                 $already_bought_discounted = $res_bought['total'] ?? 0;
                 $check_stmt->close();
-                
+
                 // TELJES kvóta
                 $total_used_quota = $discounted_in_cart + $already_bought_discounted;
-                
+
                 // UGYANAZ A LOGIKA MINT INDEX.PHP
                 if ($total_used_quota < $max_allowed_discounted) {
-                    // Kedvezményes ár kiszámítása (% alapján)
+                    // Még van keret az akciós árhoz
                     $price_after_discount = $product['price'] * (1 - ($discount / 100));
                     
-                    // Ha még nincs ilyen akciós termék a kosárban -> hozzáadás
                     if (!isset($_SESSION['cart'][$discount_key])) {
                         $_SESSION['cart'][$discount_key] = [
                             'product_id' => $p_id,
@@ -188,12 +175,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
                             'quantity' => 1
                         ];
                     } else {
-                        // Ha már van → darabszám növelése
                         $_SESSION['cart'][$discount_key]['quantity']++;
                     }
                 } else {
-                    //=============== NORMÁL ÁR (LIMIT ELÉRVE) ===============//
-                    // Ha elfogyott az akciós keret, normál áron kerül a kosárba
+                    // Elfogyott a keret -> Normál ár
                     if (!isset($_SESSION['cart'][$p_id])) {
                         $_SESSION['cart'][$p_id] = [
                             'product_id' => $p_id,
@@ -206,8 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
                     }
                 }
             } else {
-                //=============== NINCS KEDVEZMÉNY ===============//
-                // Alap működés: normál ár
+                // Nincs aktív kupon -> Normál működés
                 if (!isset($_SESSION['cart'][$p_id])) {
                     $_SESSION['cart'][$p_id] = [
                         'product_id' => $p_id,
@@ -220,13 +204,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
                 }
             }
             
-            // Sikeres hozzáadás után visszairányítás
             header("Location: termekeink.php?added=1");
             exit;
-
         } else {
-            //=============== NINCS KÉSZLET ===============//
-            // Ha nincs elegendő készlet
             header("Location: termekeink.php?error=no_stock");
             exit;
         }
