@@ -1,111 +1,37 @@
 <?php
-/*
-====================================================
-TERMÉKLISTÁZÓ ÉS KOSÁRKEZELŐ LOGIKA (termekeink.php)
-====================================================
+session_start();
+require_once "db.php"; 
 
-Ez a fájl a webáruház egyik központi eleme, amely a következő fő feladatokat látja el:
-
-1. MUNKAMENET KEZELÉS
-- A session indításával biztosítja a felhasználói adatok (pl. kosár, kuponok) tárolását.
-- Eltárolja az utolsó meglátogatott oldalt a navigáció megkönnyítésére.
-
-2. ADATBÁZIS KAPCSOLAT
-- A db.php fájlon keresztül csatlakozik az adatbázishoz.
-- Lekérdezi a szükséges adatokat (termékek, kategóriák, beállítások).
-
-3. KUPON- ÉS KEDVEZMÉNYKEZELÉS
-- Ellenőrzi, hogy a felhasználónak van-e aktív kuponja.
-- Figyelembe veszi a kupon lejárati idejét.
-- Dinamikusan alkalmazza a kedvezményt a termékekre.
-- A kedvezményes termékek darabszámát a SETTINGS táblában megadott limit szabályozza.
-
-4. KOSÁRKEZELÉS (SESSION ALAPÚ)
-- A felhasználó kosarát a session-ben tárolja.
-- Termék hozzáadásakor:
-  -> ellenőrzi a jogosultságot (csak vásárló adhat hozzá),
-  -> ellenőrzi a raktárkészletet,
-  -> kezeli a kedvezményes és normál árú tételeket külön.
-- Biztosítja, hogy a felhasználó ne vásárolhasson többet, mint a rendelkezésre álló készlet.
-
-5. KATEGÓRIÁK ÉS TERMÉKEK MEGJELENÍTÉSE
-- Lekérdezi a kategóriákat és azokhoz tartozó termékeket.
-- A renderCategory() függvény felel a termékek dinamikus megjelenítéséért.
-- Megjeleníti:
-  -> termék nevét,
-  -> árát (kedvezményesen vagy normál áron),
-  -> készlet állapotát vizuális jelöléssel,
-  -> képet (fallback képpel, ha nincs megadva).
-
-6. DINAMIKUS KUPON KVÓTA KEZELÉS
-- Figyelembe veszi:
-  -> korábbi vásárlásokat (adatbázisból),
-  -> aktuális kosár tartalmát (session-ből).
-- Ezek alapján számolja ki, hogy a felhasználó még hány kedvezményes terméket vásárolhat.
-
-7. BIZTONSÁG
-- Prepared statement-eket használ SQL injection ellen.
-- htmlspecialchars() használata XSS támadások ellen.
-- Jogosultság ellenőrzések (role alapú hozzáférés).
-
-8. FELHASZNÁLÓI ÉLMÉNY
-- Visszajelzések URL paraméterekkel (pl. sikeres kosárba helyezés, készlethiány).
-- Dinamikus ármegjelenítés és kupon státusz visszajelzés.
-
-Összességében ez a modul biztosítja a webáruház alapvető működését:
-termékek böngészése, kosár kezelés és kedvezmények alkalmazása.
-
-====================================================
-*/
-
-session_start();            // Munkamenet indítása a felhasználói adatok (pl. kosár, kupon) kezeléséhez
-require_once "db.php";      // Adatbázis kapcsolat betöltése
-
-$_SESSION['last_page'] = 'termekeink.php';  // Az utolsó meglátogatott oldal mentése (pl. visszairányításhoz)
-
-
+$_SESSION['last_page'] = 'termekeink.php';
 
 // --- 1. KEDVEZMÉNY ÉS KOSÁR ADATOK ---
 
-// Beállítások lekérése az adatbázisból (pl. hány termékre alkalmazható a kedvezmény)
+// ÚJ: Beállítások lekérése az adatbázisból a dinamikus limithez
 $settings_res = $conn->query("SELECT max_discounted_items FROM SETTINGS LIMIT 1");
 $settings = $settings_res->fetch_assoc();
+$max_allowed_discounted = $settings['max_discounted_items'] ?? 1; // Alapértelmezett 1, ha nincs az adatbázisban
 
-// Maximálisan kedvezményezhető termékek száma (ha nincs adat, alapértelmezett: 1)
-$max_allowed_discounted = $settings['max_discounted_items'] ?? 1;
-
-// Alapértelmezett kedvezmény értékek inicializálása
+// Csak azt a kedvezményt használjuk, amit a kupon.php már jóváhagyott a munkamenetben
 $discount = 0;
 $expiry_timestamp = 0;
 
-// Ellenőrizzük, hogy a felhasználó be van-e jelentkezve
 if (isset($_SESSION['user_id'])) {
-    // Ha van érvényes kupon a session-ben és még nem járt le
     if (isset($_SESSION['coupon_expiry']) && $_SESSION['coupon_expiry'] > time()) {
-
-        $discount = $_SESSION['coupon_discount'] ?? 0;          // Kedvezmény mértéke (%)
-        $expiry_timestamp = $_SESSION['coupon_expiry'] * 1000;  // Lejárati idő (ms, JS kompatibilitás miatt)
-
+        $discount = $_SESSION['coupon_discount'] ?? 0;
+        $expiry_timestamp = $_SESSION['coupon_expiry'] * 1000;
     } else {
-        // Ha a kupon lejárt vagy nem érvényes, töröljük a session-ből
         unset($_SESSION['coupon_discount']);
         unset($_SESSION['coupon_expiry']);
     }
 }
 
-
-
-//=============== KATEGÓRIÁK LEKÉRÉSE ===============//
-// Az összes kategória lekérdezése az adatbázisból,
-// amelyeket a navigációs menüben és a terméklista szűréséhez használunk
+// Kategóriák lekérése a navigációhoz és a listázáshoz
 $categories = $conn->query("SELECT * FROM CATEGORIES");
 
-//=============== FELHASZNÁLÓI SZEREPKÖR ===============//
-// Ellenőrizzük, hogy a bejelentkezett felhasználó admin-e (role = 2)
+// Felhasználói szerepkör ellenőrzése
 $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] == '2';
 
-//=============== KOSÁR KEZELÉSE (POST KÉRÉS) ===============//
-// Akkor fut le, ha a felhasználó terméket ad a kosárhoz
+// --- 2. KOSÁR KEZELÉSE (POST) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
 
     // Csak bejelentkezett 'vásárló' (role=0) tehet a kosárba
@@ -213,57 +139,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
     }
 }
 
-// Kosár összesített darabszámának kiszámolása a fejlécben megjelenítéshez
-// Végigiterál a session-ben tárolt kosár elemein, és összeadja a darabszámokat
+// Kosár összesített darabszámának kiszámolása a fejlécnek
 $total_items = 0;
-
 if (!empty($_SESSION['cart'])) {
     foreach ($_SESSION['cart'] as $item) {
-        $total_items += $item['quantity'];  // Minden termék mennyiségének hozzáadása az összeghez
+        $total_items += $item['quantity'];
     }
 }
 
+// --- 3. RENDEREKÉS ÉS FUNKCIÓK ---
 
-
-// --- 3. RENDERELÉS ÉS FUNKCIÓK ---
-
-/*
- Ez a függvény egy adott kategória termékeit jeleníti meg dinamikusan.
- Feladata:
- - Lekéri az adott kategóriához tartozó termékeket az adatbázisból
- - Figyelembe veszi a felhasználó kuponkedvezményét és annak korlátait
- - Ellenőrzi, hogy a felhasználó mennyi kedvezményes terméket vásárolt már
- - Megjeleníti az árakat (eredeti és kedvezményes)
- - Kezeli a készlet állapot vizuális jelzését
- - Lehetővé teszi a kosárba helyezést (csak vásárló szerepkör esetén)
-*/
 function renderCategory($conn, $cat_id, $cat_title, $cat_subtitle) {
-
-    // Session adatok lekérése (aktuális felhasználó és kuponkedvezmény)
+    // Session adatok elérése a függvényen belül
     $discount = $_SESSION['coupon_discount'] ?? 0;
     $user_id = $_SESSION['user_id'] ?? 0;
 
-    // Beállítások lekérése: maximum hány termékre használható a kupon
+    // Beállítások lekérése a függvényen belül is a kvóta megjelenítéséhez
     $set_res = $conn->query("SELECT max_discounted_items FROM SETTINGS LIMIT 1");
     $settings = $set_res->fetch_assoc();
     $max_limit = $settings['max_discounted_items'] ?? 1;
 
-    // Termékek lekérdezése az adott kategóriából
     $stmt = $conn->prepare("SELECT id, name, price, image, category_id, stock FROM PRODUCTS WHERE category_id = ?");
     $stmt->bind_param("i", $cat_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    // Kategória szekció megnyitása
     echo '<section class="favorite section" id="category' . $cat_id . '">';
     echo '   <h2 class="section__title">' . htmlspecialchars($cat_title) . '</h2>';
     echo '   <div class="favorite__container container grid">';
 
-    // Termékek bejárása
     while ($row = $result->fetch_assoc()) {
         $p_id = $row['id'];
         
-        // Korábbi kedvezményes vásárlások összesítése (adatbázisból)
+        // Korábbi vásárlások ellenőrzése a dinamikus kvótához
         $already_bought_discounted = 0;
         if ($user_id > 0 && $discount > 0) {
             $check_stmt = $conn->prepare("
@@ -279,71 +187,49 @@ function renderCategory($conn, $cat_id, $cat_title, $cat_subtitle) {
             $check_stmt->close();
         }
 
-        // Kosárban lévő kedvezményes mennyiség lekérése (sessionből)
         $discount_key = $p_id . "_discounted";
         $already_in_cart_discounted = $_SESSION['cart'][$discount_key]['quantity'] ?? 0;
         
-        // Összes eddig felhasznált kedvezmény
         $total_used_quota = $already_bought_discounted + $already_in_cart_discounted;
         
-        // Eldöntjük, hogy megjeleníthető-e még a kedvezmény
+        // A 4-es szám helyett a $max_limit-et használjuk az ellenőrzésnél
         $show_discount = ($discount > 0 && $total_used_quota < $max_limit);
         
-        // Készlet állapot alapján CSS osztály hozzárendelése
+        // Készlet állapot színek
         if ($row['stock'] > 15) { $stockClass = "stock-high"; } 
         elseif ($row['stock'] > 0) { $stockClass = "stock-medium"; } 
         else { $stockClass = "stock-zero"; }
 
-        // Kép elérési út összeállítása (fallback ha nincs kép)
         $imgPath = "assets/img/category_{$row['category_id']}/" . $row['image'];
         if (!file_exists($imgPath) || empty($row['image'])) { $imgPath = "assets/img/no-image.png"; }
 
-        // Ár számítás (eredeti és kedvezményes)
         $original_price = $row['price'];
         $price_after_discount = $original_price * (1 - $discount / 100);
         ?>
 
-
-        <!-- Egy termék kártya -->
         <article class="favorite__card <?= $stockClass ?>">
-
-            <!-- Termék link és kép -->
             <a href="termek.php?id=<?= $p_id ?>&from=termekeink.php">
                <img src="<?= $imgPath ?>" class="favorite__img" alt="<?= htmlspecialchars($row['name']) ?>">
             </a>
             
-            <!-- Termék adatok -->
             <div class="favorite__data">
                 <h2 class="favorite__title"><?= htmlspecialchars($row['name']) ?></h2>
                 <span class="favorite__subtitle"><?= htmlspecialchars($cat_subtitle) ?></span>
                 
-                <!-- Ár megjelenítés -->
                 <h3 class="favorite__price">
                     <?php if ($show_discount): ?>
-
-                        <!-- Eredeti ár áthúzva -->
                         <span style="text-decoration: line-through; color: #aaa; font-size: 0.8rem;">
                             <?= number_format($original_price, 0, '', ' ') ?> Ft
                         </span>
-
-                        <!-- Kedvezményes ár -->
                         <span style="color: #ffbc3f;"> 
                             <?= number_format($price_after_discount, 0, '', ' ') ?> Ft/kg
                         </span>
                         <br>
-
-                        <!-- Maradék kupon -->
                         <small style="font-size: 1.2rem; font-weight: bold; color: #f7ff8c;">
                             Maradt: <?= $max_limit - $total_used_quota ?> db
                         </small>
-
-
                     <?php else: ?>
-
-                        <!-- Normál ár -->
                         <?= number_format($original_price, 0, '', ' ') ?> Ft/kg
-
-                        <!-- Ha elfogyott a kupon -->
                         <?php if($discount > 0 && $total_used_quota >= $max_limit): ?>
                             <br><small style="font-size: 1.2rem; font-weight: bold; color: red;">Nincs több kuponod!</small>
                         <?php endif; ?>
@@ -351,7 +237,6 @@ function renderCategory($conn, $cat_id, $cat_title, $cat_subtitle) {
                 </h3>
             </div>
 
-            <!-- Kosárba gomb (csak vásárlóknak) -->
             <?php if(isset($_SESSION['role']) && $_SESSION['role'] == '0'): ?>
                <form method="POST">
                   <input type="hidden" name="id" value="<?= $p_id ?>">
@@ -363,8 +248,6 @@ function renderCategory($conn, $cat_id, $cat_title, $cat_subtitle) {
         </article>
         <?php
     }
-
-    // Szekció lezárása
     echo '   </div>';
     echo '</section>';
 }
@@ -373,63 +256,51 @@ function renderCategory($conn, $cat_id, $cat_title, $cat_subtitle) {
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-   <meta charset="UTF-8">                                                   <!-- Karakterkódolás beállítása (UTF-8, magyar ékezetek támogatása) -->
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">   <!-- Reszponzív megjelenítés mobil eszközökhöz -->
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-   <!-- Weboldal ikon (favicon) -->
    <link rel="shortcut icon" href="assets/img/logo/MELICO LOGO 2.png" type="image/x-icon">
-   
-    <!-- Ikonok (Remixicon könyvtár betöltése) -->
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.7.0/remixicon.css">
-   
-    <!-- Fő stíluslap -->
    <link rel="stylesheet" href="assets/css/styles.css">
 
-   <!-- Oldal címe a böngésző fülön -->
    <title>MELICO – Termékeink</title>
 
    <style>
-    /*=============== KUPON ÉRTESÍTŐ SÁV ===============*/
-    /* Felső figyelmeztető sáv, amely aktív kupon esetén jelenik meg */
+    /* Egy kis extra stílus a visszaszámlálónak */
        .coupon-alert {
-           background: linear-gradient(90deg, #ffbc3f, #ff9f00);    /* Narancs átmenetes háttér */
-           color: #1a150e;                    /* Sötét szöveg a kontraszt miatt */
-           padding: 1rem;                       /* Belső térköz */
-           text-align: center;                  /* Szöveg középre igazítása */
-           font-weight: bold;                   /* Félkövér szöveg */
-           border-bottom: 2px solid #e68a00;    /* Alsó szegély kiemeléshez */
-           display: none;                       /* Alapból rejtett, JS jeleníti meg ha van aktív kupon */
+           background: linear-gradient(90deg, #ffbc3f, #ff9f00);
+           color: #1a150e;
+           padding: 1rem;
+           text-align: center;
+           font-weight: bold;
+           border-bottom: 2px solid #e68a00;
+           display: none; /* Alapértelmezetten rejtve, JS fedi fel ha van aktív kupon */
        }
-
-       /*=============== VISSZASZÁMLÁLÓ IDŐZÍTŐ ===============*/
        #timer {
-         color: #000000;    /* Fekete szöveg */
-         font-weight: bold;     /* Félkövér kiemelés */
-         margin-left: 5px;      /* Kis térköz bal oldalon */
+         color: #000000;
+         font-weight: bold;
+         margin-left: 5px;
       }
 
-      /*=============== KUPON SZÖVEG RÉSZEK ===============*/
       .coupon-main {
-         margin-right: 10px;    /* Jobb oldali térköz */
+         margin-right: 10px;
       }
 
       .coupon-divider {
-         margin: 0 10px;    /* Két oldalra térköz */
-         opacity: 0.6;      /* Halvány elválasztó */
+         margin: 0 10px;
+         opacity: 0.6;
       }
 
-      /*=============== KUPON LEJÁRATI IDŐ KIEMELÉS ===============*/
       .coupon-expiry {
-         background: rgb(255, 0, 81);   /* Piros háttér (figyelemfelkeltés) */
-         padding: 3px 8px;                  /* Belső térköz */
-         border-radius: 6px;                /* Lekerekített sarkok */
+         background: rgb(255, 0, 81);
+         padding: 3px 8px;
+         border-radius: 6px;
       }
 
-      /*=============== VISSZASZÁMLÁLÓ IDŐZÍTŐ ===============*/
       #timer {
-         font-family: monospace;    /* Fix szélességű betűtípus (digitális hatás) */
-         font-size: 1.2rem;         /* Nagyobb méret a jobb láthatóságért */
-         margin-left: 5px;          /* Kis térköz bal oldalon */
+         font-family: monospace;
+         font-size: 1.2rem;
+         margin-left: 5px;
       }
     </style>
 </head>
@@ -441,44 +312,39 @@ function renderCategory($conn, $cat_id, $cat_title, $cat_subtitle) {
          <img src="assets/img/logo/MELICO LOGO.png" alt="MELICO Logo" />
       </a>
 
-      <!-- NAVIGÁCIÓS MENÜ -->
       <div class="nav__menu" id="nav-menu">
          <ul class="nav__list">
-            <!-- Alap menüpontok -->
             <li class="nav__item"><a href="index.php" class="nav__link">Főoldal</a></li>
             <li class="nav__item"><a href="termekeink.php" class="nav__link active-link">Termékeink</a></li>
             <li class="nav__item"><a href="rolunk.php" class="nav__link">Rólunk</a></li>
             <li class="nav__item"><a href="kapcsolatfelvetel.php" class="nav__link">Kapcsolatfelvétel</a></li>
 
-            <!-- ADMIN MENÜ: csak admin felhasználóknak jelenik meg -->
             <?php if($isAdmin): ?>
             <li class="nav__item">
                <a href="admin.php" class="nav__link <?php echo basename($_SERVER['PHP_SELF'])=='admin.php' ? 'active-link' : ''; ?>">Admin</a>
             </li>
             <?php endif; ?>
 
-            <!-- BEJELENTKEZÉS / PROFIL -->
+            <!-- Bejelentkezés / Profil -->
             <li class="nav__item">
                <?php if (isset($_SESSION['user_id'])): ?>
                   <a href="profil.php" class="nav__link nav__profile">
                         <i class="ri-user-line"></i>
                   </a>
                <?php else: ?>
-                <!-- Ha nincs: bejelentkezés gomb -->
                   <a href="signIn.php" class="nav__signin button">Bejelentkezés</a>
                <?php endif; ?>
             </li>
 
-            <!-- KUPON ÉS KOSÁR: nem admin felhasználóknak -->
+            <!-- Kupon -->
             <?php if (!$isAdmin): ?>
-                <!-- Kupon oldal ikon -->
                <li class="nav__item">
                   <a href="kupon.php" class="nav__link <?php echo basename($_SERVER['PHP_SELF'])=='kupon.php' ? 'active-link' : ''; ?>">
                      <i class="ri-coupon-2-line"></i>
                   </a>
                </li>
 
-               <!-- Kosár ikon és darabszám kijelzés -->
+               <!-- Kosár -->
                <li class="nav__item">
                    <a href="kosar.php" class="nav__link"><i class="ri-shopping-cart-fill"></i>
                    <?php 
@@ -487,7 +353,6 @@ function renderCategory($conn, $cat_id, $cat_title, $cat_subtitle) {
                        foreach ($_SESSION['cart'] as $item) {
                            $total_items += $item['quantity'];
                        }
-                       /* Csak akkor jelenik meg a darabszám, ha van termék a kosárban */
                        if ($total_items > 0) echo "($total_items)";
                    }
                    ?>
@@ -496,54 +361,42 @@ function renderCategory($conn, $cat_id, $cat_title, $cat_subtitle) {
             <?php endif; ?>
          </ul>
 
-         <!-- Mobil menü bezáró ikon -->
          <div class="nav__close" id="nav-close"><i class="ri-close-line"></i></div>
 
-         <!-- Dekoratív képek a menüben -->
          <img src="assets/img/cheese2.png" alt="image" class="nav__img-1">
          <img src="assets/img/cheese1.png" alt="image" class="nav__img-2">
       </div>
 
-      <!-- Mobil menü megnyitó ikon -->
       <div class="nav__toggle" id="nav-toggle"><i class="ri-menu-fill"></i></div>
    </nav>
 </header>
 
-<!--=============== FŐ TARTALMI RÉSZ (MAIN) ===============-->
 <main class="main">
 
 <?php if ($discount > 0): ?>
-    <!-- Kupon értesítés sáv: csak akkor jelenik meg, ha van aktív kedvezmény -->
       <div id="coupon-countdown" class="coupon-alert" style="display: block;">
          <i class="ri-time-line"></i> 
 
-         <!-- Kupon fő szöveg -->
          <span class="coupon-main">
             FIGYELEM! Van egy <strong><?= $discount ?>%-os</strong> kuponod! Lejár:
          </span>
 
-         <!-- Visszaszámláló megjelenítése -->
          <span class="coupon-expiry">
             <span id="timer">--:--:--</span>
          </span>
       </div>
       <?php endif; ?>
 
-    <?php if(isset($_GET['error']) && $_GET['error'] == 'no_permission'): ?>
-        <!-- Hibaüzenet: ha nem vásárló próbál kosárba tenni -->
-        <p style="color:red; text-align:center; font-weight:bold; margin: 20px 0;">
-            Csak vásárlók tehetnek terméket a kosárba!
-        </p>
-    <?php endif; ?>
+<?php if(isset($_GET['error']) && $_GET['error'] == 'no_permission'): ?>
+    <p style="color:red; text-align:center; font-weight:bold; margin: 20px 0;">
+        Csak vásárlók tehetnek terméket a kosárba!
+    </p>
+<?php endif; ?>
 
-    <!-- Háttérkép a termékek oldalhoz -->
    <img src="assets/img/Termékek-bg.png" alt="image" class="home__bg">
 
-   <!--=============== TERMÉKEK BEMUTATÓ SZEKCIÓ ===============-->
    <section class="about section" id="termekeink">
       <div class="about__container container grid">
-
-        <!-- Szöveges bemutatás -->
          <div class="about__data">
             <h2 class="section__title">Termékeink</h2>
             <p class="about__description">
@@ -552,130 +405,91 @@ function renderCategory($conn, $cat_id, $cat_title, $cat_subtitle) {
                A minőséget, frissességet és az egyedi ízvilágot minden termékünknél kiemelten kezeljük.
             </p>
          </div>
-
-         <!-- Illusztrációs kép -->
          <img src="assets/img/cheese3.png" alt="Kézműves sajtok" class="about-img">
       </div>
    </section>
 
-   <!--=============== KATEGÓRIA NAVIGÁCIÓ ===============-->
    <div class="page-nav">
-        <?php
-        // Kategóriák bejárása navigációhoz
-        $categories->data_seek(0);
-        while($cat = $categories->fetch_assoc()):
-        ?>
-        <!-- Kattintható linkek az adott kategória szekcióhoz -->
-        <a href="#category<?php echo $cat['id']; ?>" class="nav__link">
-            <?php echo htmlspecialchars($cat['name']); ?>
-        </a>
-        <?php endwhile; ?>
+    <?php
+    $categories->data_seek(0);
+    while($cat = $categories->fetch_assoc()):
+    ?>
+    <a href="#category<?php echo $cat['id']; ?>" class="nav__link">
+        <?php echo htmlspecialchars($cat['name']); ?>
+    </a>
+    <?php endwhile; ?>
     </div>
 
-    <!--=============== TERMÉKEK LISTÁZÁSA KATEGÓRIÁNKÉNT ===============-->
     <?php
-    // Kategóriák újra bejárása a termékek kirendereléséhez
     $categories->data_seek(0);
     while($cat = $categories->fetch_assoc()){
         renderCategory(
-            $conn,          // adatbázis kapcsolat
-            $cat['id'],     // kategória azonosító
-            $cat['name'],   // kategória neve
-            $cat['name']    // (feliratként is használva)
+            $conn,
+            $cat['id'],
+            $cat['name'],
+            $cat['name']
         );
     }
     ?>
 
 </main>
 
-<!--=============== LÁBLÉC ===============-->
 <footer class="footer">
    <span class="footer__copy">&#169; 2026 MELICO. Minden jog fenntartva.</span>
 </footer>
 
-<!--=============== GÖRGETÉS FEL GOMB ===============-->
 <a href="#" class="scrollup" id="scroll-up"><i class="ri-arrow-up-line"></i></a>
 
 
 
 
 <script>
-/*=============== KUPON VISSZASZÁMLÁLÓ TIMER ===============*/
-/* Ez a script egy kupon lejárati idejéhez tartozó visszaszámlálót jelenít meg a felhasználónak. */
+const expiryTime = <?= (float)$expiry_timestamp ?>;
+const timerElement = document.getElementById('timer');
+const alertBox = document.getElementById('coupon-countdown');
 
-const expiryTime = <?= (float)$expiry_timestamp ?>;             // PHP-ből kapott lejárati idő (timestamp ms-ben)
-const timerElement = document.getElementById('timer');          // Idő megjelenítésére szolgáló HTML elem
-const alertBox = document.getElementById('coupon-countdown');   // A teljes visszaszámláló doboz (pl. figyelmeztetés)
-
-/* Ha van érvényes lejárati idő és létezik a megjelenítő elem */
 if (expiryTime > 0 && timerElement) {
-
-    /* Frissítő függvény, ami másodpercenként újraszámolja a hátralévő időt */
     const updateTimer = () => {
-        const now = new Date().getTime();   // Jelenlegi idő
-        const distance = expiryTime - now;  // Hátralévő idő ms-ben
+        const now = new Date().getTime();
+        const distance = expiryTime - now;
 
-        /* Ha lejárt az idő, eltüntetjük a visszaszámlálót */
         if (distance <= 0) {
             if (alertBox) alertBox.style.display = 'none';
             return;
         }
 
-        /* Idő bontása napokra, órákra, percekre, másodpercekre */
         const days = Math.floor(distance / (1000 * 60 * 60 * 24));
         const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        /* Kétjegyű formázás (pl. 09:05:03) */
         const h = hours.toString().padStart(2, '0');
         const m = minutes.toString().padStart(2, '0');
         const s = seconds.toString().padStart(2, '0');
 
-        /* Szöveges megjelenítés összeállítása */
         let timeDisplay = days + " nap " + `${h}ó:${m}p:${s}m`;
         timerElement.innerHTML = timeDisplay;
     };
 
-    /* Azonnali frissítés, majd 1 másodpercenként ismétlés */
     updateTimer();
     setInterval(updateTimer, 1000);
 }
 </script>
 
 <script>
-/*=============== RENDSZERINTEGRITÁS / VÉDELEM ===============*/
-/*
- Ez a script egy egyszerű kliensoldali védelemként működik.
- Feladata, hogy időszakosan (2 másodpercenként) ellenőrizze,
- hogy a rendszerhez tartozó védelmi elem (vízjel vagy azonosító)
- jelen van-e az oldalon.
-
- Működés:
- - Ha a "dev_access" jelölés NEM található a HTML-ben,
-   akkor ellenőrzi a "_sys_protection_v2" azonosítójú elemet.
- - Ha ez az elem hiányzik, vagy el van rejtve (opacity: 0 / display: none),
-   akkor a rendszer feltételezi, hogy manipuláció történt.
- - Ilyenkor az egész oldal tartalma lecserélődik egy hibaüzenetre,
-   és a görgetés is letiltásra kerül.
-
- Megjegyzés:
- Ez nem teljes körű biztonsági megoldás, inkább demonstrációs célú
- vagy alap szintű védelem a vizsgaremek projektben.
-*/
 (function() {
     setInterval(function() {
-        // Ha nem fejlesztői mód (dev_access), akkor ellenőriz
+        // Ha nem te vagy a boss, ellenőrizzük a vízjelet
         if (!document.body.innerHTML.includes('dev_access')) {
             var check = document.getElementById('_sys_protection_v2');
             
-            // Ha hiányzik vagy el van rejtve -> hiba képernyő
+            // Ha törölték vagy elrejtették (opacity 0 vagy display none)
             if (!check || window.getComputedStyle(check).opacity == "0" || window.getComputedStyle(check).display == "none") {
                 document.body.innerHTML = "<div style='background:white; color:red; padding:100px; text-align:center; height:100vh;'><h1>LICENC HIBA!</h1><p>A rendszer integritása megsérült. Kérjük, lépjen kapcsolatba a fejlesztővel.</p></div>";
                 document.body.style.overflow = "hidden";
             }
         }
-    }, 2000); // 2 másodpercenként futó ellenőrzés
+    }, 2000); // 2 másodpercenként csekkol
 })();
 </script>
 
