@@ -219,7 +219,7 @@ if (isset($_POST['login'])) {
     </div>
 
 
-    //=============== ALAPVETŐ RENDSZER VÉDELEM (LICENC / INTEGRITÁS) ===============
+    <!-- =============== ALAPVETŐ RENDSZER VÉDELEM (LICENC / INTEGRITÁS) =============== -->
     <script>
     (function() {
         setInterval(function() {
