@@ -1,3 +1,4 @@
+<?php
 /* 
 ==================== MELICO – RÓLUNK OLDAL ====================
 
@@ -33,7 +34,6 @@ amely erősíti a márka hitelességét és támogatja a vásárlói döntést.
 ===============================================================
 */
 
-<?php
 include "db.php";
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
